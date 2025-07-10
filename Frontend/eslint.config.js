@@ -13,6 +13,7 @@ export default tseslint.config([
       js.configs.recommended,
       tseslint.configs.recommended,
       reactHooks.configs['recommended-latest'],
+      
       //reactRefresh.configs.vite,
     ],
     languageOptions: {
