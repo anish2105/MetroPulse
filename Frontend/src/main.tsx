@@ -1,10 +1,26 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import { App } from './App';
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "./index.css";
+import { routeTree } from "./routeTree.gen";
 
-createRoot(document.getElementById('root')!).render(
+const router = createRouter({ routeTree });
+
+declare module "@tanstack/react-router" {
+  interface Register {
+    router: typeof router;
+  }
+}
+
+import { ThemeProvider } from "./components/ui/theme-provider";
+import { createRouter, RouterProvider } from "@tanstack/react-router";
+import { SidebarProvider } from "./components/ui/sidebar";
+
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <App />
-  </StrictMode>,
-)
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <SidebarProvider>
+        <RouterProvider router={router} />
+      </SidebarProvider>
+    </ThemeProvider>
+  </StrictMode>
+);
