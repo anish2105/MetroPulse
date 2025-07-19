@@ -10,7 +10,6 @@ import {
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { auth, db, googleProvider } from "@/firebase/config";
 import type { AuthContextType } from "@/types/AuthContextType";
-import {  useRouter } from "@tanstack/react-router";
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -21,7 +20,6 @@ export function useAuth() {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -31,12 +29,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
     return () => unsub();
   }, []);
-
-  useEffect(() => {
-    if (!loading && !user) {
-      router.navigate({ to: "/" }); // 👈 correct usage
-    }
-  }, [user, loading, router]);
 
   // Store user in Firestore on signup/login
   async function saveUserToFirestore(user: User) {
@@ -82,7 +74,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await signOut(auth); // wait for logout to complete
       setUser(null); // optional, forces immediate state update
-      router.navigate({ to: "/" });
     } catch (error) {
       console.error("Logout failed:", error);
     }

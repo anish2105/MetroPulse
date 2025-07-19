@@ -14,27 +14,13 @@ export default function AuthForm({
 }) {
   const auth = useAuth();
   if (!auth) throw new Error("useAuth must be used within AuthProvider");
-  const { login, signup, loginWithGoogle, user, logout } = auth;
+  const { login, signup, loginWithGoogle } = auth;
   const [isLogin, setIsLogin] = useState(mode === "login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  if (user) {
-    return (
-      <div className="p-4 flex flex-col items-center">
-        <div className="mb-2">Welcome, {user.email}</div>
-        <Button onClick={logout} className="w-full mb-2">
-          Logout
-        </Button>
-        {onClose && (
-          <Button variant="secondary" onClick={onClose} className="w-full">
-            Close
-          </Button>
-        )}
-      </div>
-    );
-  }
+
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();

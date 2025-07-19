@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  Home,
   Zap,
   MapPin,
   AlertTriangle,
@@ -25,18 +24,19 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Link} from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 import { ModeToggle } from "./ui/mode-toggle";
 import { useAuth } from "@/context/AuthContext";
-import AuthForm from "@/components/AuthForm"; // Make sure this exists
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
+import AuthForm from "@/components/AuthForm";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 export const items = [
-  {
-    title: "Home",
-    url: "/",
-    icon: Home,
-  },
   {
     title: "Live Feed",
     url: "/feed",
@@ -94,7 +94,7 @@ export function AppSidebar() {
   const [authModalOpen, setAuthModalOpen] = useState<"login" | "signup" | null>(
     null
   );
-
+  const router = useRouter();
   return (
     <Sidebar>
       <SidebarHeader className="flex flex-row gap-2 px-4 pt-4">
@@ -180,7 +180,10 @@ export function AppSidebar() {
           ) : (
             <SidebarMenuItem>
               <SidebarMenuButton
-                onClick={logout}
+                onClick={async () => {
+                  await logout();
+                  router.navigate({ to: "/" });
+                }}
                 className="hover:bg-gray-800 flex items-center space-x-2 px-3 py-2 rounded-lg w-full text-red-500"
               >
                 <LogIn className="w-5 h-5" />
@@ -193,10 +196,15 @@ export function AppSidebar() {
           <ModeToggle />
         </div>
         {/* Auth Modal using shadcn/ui dialog */}
-        <Dialog open={!!authModalOpen} onOpenChange={() => setAuthModalOpen(null)}>
+        <Dialog
+          open={!!authModalOpen}
+          onOpenChange={() => setAuthModalOpen(null)}
+        >
           <DialogContent className="max-w-sm">
             <DialogHeader>
-              <DialogTitle>{authModalOpen === "login" ? "Login" : "Sign Up"}</DialogTitle>
+              <DialogTitle>
+                {authModalOpen === "login" ? "Login" : "Sign Up"}
+              </DialogTitle>
               <DialogClose asChild>
                 <button
                   className="absolute top-2 right-2 text-gray-400 hover:text-white"

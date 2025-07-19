@@ -49,12 +49,6 @@ export default function LandingPage() {
               {authModalOpen === "login" ? "Login to MetroPulse" : "Sign Up for MetroPulse"}
             </DialogTitle>
             <DialogClose asChild>
-              <button
-                className="absolute top-2 right-2 text-gray-400 hover:text-white"
-                onClick={() => setAuthModalOpen(null)}
-              >
-                ×
-              </button>
             </DialogClose>
           </DialogHeader>
           {authModalOpen && (

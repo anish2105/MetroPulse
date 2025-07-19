@@ -1,11 +1,11 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { auth } from "@/firebase/config";
 import AppLayout from "@/components/layouts/AppLayout";
-import FeedPage from "@/landing"; 
 import { waitForFirebaseAuth } from "@/lib/waitForAuth";
+import MapVS from "@/components/maps/Map";
+// import MapHome from "@/components/maps/map-home";
 
-
-export const Route = createFileRoute("/feed")({
+export const Route = createFileRoute("/map")({
   beforeLoad: async () => {
     await waitForFirebaseAuth();
     const user = auth.currentUser;
@@ -13,7 +13,12 @@ export const Route = createFileRoute("/feed")({
   },
   component: () => (
     <AppLayout>
-      <FeedPage />
+      <MapVS
+        location={
+          { lat: 12.9629, lng: 77.5775 } // Default location, can be replaced with dynamic data
+        }
+      />
+      {/* <MapHome /> */}
     </AppLayout>
   ),
 });
