@@ -1,10 +1,10 @@
-import MetroPulse from "@/landing";
+import LandingPage from "@/components/LandingPage";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
-  component: Index,
+  component: RouteComponent,
 });
 
-function Index() {
-  return <MetroPulse />;
+function RouteComponent() {
+  return <LandingPage />;
 }

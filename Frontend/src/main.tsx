@@ -2,7 +2,8 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import { routeTree } from "./routeTree.gen";
-
+import { ThemeProvider } from "./components/ui/theme-provider";
+import { createRouter, RouterProvider } from "@tanstack/react-router";
 const router = createRouter({ routeTree });
 
 declare module "@tanstack/react-router" {
@@ -11,16 +12,10 @@ declare module "@tanstack/react-router" {
   }
 }
 
-import { ThemeProvider } from "./components/ui/theme-provider";
-import { createRouter, RouterProvider } from "@tanstack/react-router";
-import { SidebarProvider } from "./components/ui/sidebar";
-
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <SidebarProvider>
-        <RouterProvider router={router} />
-      </SidebarProvider>
+      <RouterProvider router={router} />
     </ThemeProvider>
   </StrictMode>
 );
