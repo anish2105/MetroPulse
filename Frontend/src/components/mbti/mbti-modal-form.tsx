@@ -1,5 +1,4 @@
-// src/components/mbti/MbtiModalForm.tsx
-import React, { useState, useEffect, type FormEvent } from "react";
+import{ useState, useEffect, type FormEvent } from "react";
 import {
   Dialog,
   DialogContent,

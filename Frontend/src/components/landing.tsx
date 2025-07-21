@@ -1,31 +1,24 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import {
   MapPin,
-  Bell,
   Search,
-  Plus,
-  User,
+ 
   Filter,
   Heart,
   MessageCircle,
   Share2,
-  AlertTriangle,
-  Calendar,
+ 
   Zap,
-  Eye,
-  Settings,
-  Menu,
+
   X,
   Send,
 } from "lucide-react";
 
 
 export default function MetroPulse(){
-  const [activeTab, setActiveTab] = useState("feed");
+  const [activeTab, ] = useState("feed");
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
-  const [showSidebar, setShowSidebar] = useState(false);
 
   const events = [
     {
@@ -163,134 +156,13 @@ export default function MetroPulse(){
     </div>
   );
 
-  // const Sidebar = () => (
-  //   <div
-  //     className={`fixed inset-y-0 left-0 w-64 bg-gray-900 border-r border-gray-700 transform transition-transform duration-300 ease-in-out ${
-  //       showSidebar ? "translate-x-0" : "-translate-x-full"
-  //     } lg:translate-x-0 lg:static lg:inset-0`}
-  //   >
-  //     <div className="p-4 border-b border-gray-700">
-  //       <div className="flex items-center justify-between">
-  //         <h2 className="text-lg font-semibold text-white">MetroPulse</h2>
-  //         <button
-  //           onClick={() => setShowSidebar(false)}
-  //           className="lg:hidden text-gray-400 hover:text-gray-200"
-  //         >
-  //           <X className="w-5 h-5" />
-  //         </button>
-  //       </div>
-  //     </div>
-
-  //     <nav className="p-4">
-  //       <div className="space-y-2">
-  //         <button
-  //           onClick={() => setActiveTab("feed")}
-  //           className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
-  //             activeTab === "feed"
-  //               ? "bg-blue-600 text-white"
-  //               : "text-gray-300 hover:bg-gray-800"
-  //           }`}
-  //         >
-  //           <Zap className="w-5 h-5" />
-  //           <span>Live Feed</span>
-  //         </button>
-
-  //         <button
-  //           onClick={() => setActiveTab("map")}
-  //           className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
-  //             activeTab === "map"
-  //               ? "bg-blue-600 text-white"
-  //               : "text-gray-300 hover:bg-gray-800"
-  //           }`}
-  //         >
-  //           <MapPin className="w-5 h-5" />
-  //           <span>City Map</span>
-  //         </button>
-
-  //         <button className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left text-gray-300 hover:bg-gray-800">
-  //           <AlertTriangle className="w-5 h-5" />
-  //           <span>Alerts</span>
-  //         </button>
-
-  //         <button className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left text-gray-300 hover:bg-gray-800">
-  //           <Calendar className="w-5 h-5" />
-  //           <span>Events</span>
-  //         </button>
-
-  //         <button className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left text-gray-300 hover:bg-gray-800">
-  //           <Eye className="w-5 h-5" />
-  //           <span>Trending</span>
-  //         </button>
-  //       </div>
-
-  //       <div className="mt-8 pt-4 border-t border-gray-700">
-  //         <h3 className="text-sm font-medium text-gray-200 mb-3">
-  //           Personalization
-  //         </h3>
-  //         <div className="space-y-2">
-  //           <button className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left text-gray-300 hover:bg-gray-800">
-  //             <User className="w-5 h-5" />
-  //             <span>MBTI Profile</span>
-  //           </button>
-  //           <button className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left text-gray-300 hover:bg-gray-800">
-  //             <Settings className="w-5 h-5" />
-  //             <span>Preferences</span>
-  //           </button>
-  //         </div>
-  //       </div>
-  //     </nav>
-  //   </div>
-  // );
+ 
 
   return (
     <div className="min-h-screen bg-gray-800 flex">
-      {/* Sidebar */}
-      {/* <Sidebar /> */}
 
-      {/* Overlay for mobile */}
-      {/* {showSidebar && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={() => setShowSidebar(false)}
-        />
-      )} */}
-
-      {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        {/* Header */}
-        {/* <header className="bg-gray-900 border-b border-gray-700 px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => setShowSidebar(true)}
-                className="lg:hidden text-gray-400 hover:text-gray-200"
-              >
-                <Menu className="w-5 h-5" />
-              </button>
 
-              <div className="flex items-center space-x-2">
-                <MapPin className="w-6 h-6 text-blue-400" />
-                <span className="text-sm font-medium text-gray-300">
-                  Bengaluru, Karnataka
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <button className="relative p-2 text-gray-400 hover:text-gray-200">
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
-
-              <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:from-blue-700 hover:to-purple-700 shadow-lg">
-                <Plus className="w-4 h-4" />
-                <span>Report Event</span>
-              </button>
-            </div>
-          </div>
-        </header> */}
-
-        {/* Main Content Area */}
         <main className="flex-1 p-6 pb-24">
           {activeTab === "feed" ? (
             <div className="max-w-4xl mx-auto">
@@ -457,7 +329,6 @@ export default function MetroPulse(){
         </main>
       </div>
 
-      {/* Event Detail Modal */}
       {selectedEvent && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
@@ -504,9 +375,9 @@ export default function MetroPulse(){
                   </button>
                 </div>
 
-                <span className="text-xs text-gray-500">
+                {/* <span className="text-xs text-gray-500">
                   MBTI Match: {selectedEvent.mbtiMatch}
-                </span>
+                </span> */}
               </div>
             </div>
           </div>

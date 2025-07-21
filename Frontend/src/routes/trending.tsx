@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { auth } from "@/firebase/config";
 import AppLayout from "@/components/layouts/AppLayout";
-import FeedPage from "@/landing"; 
+import FeedPage from "@/components/landing"; 
 import { waitForFirebaseAuth } from "@/lib/waitForAuth";
 
 export const Route = createFileRoute('/trending')({

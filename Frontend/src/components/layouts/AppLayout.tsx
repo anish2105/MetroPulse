@@ -18,9 +18,7 @@ import { MbtiModalForm } from "../mbti/mbti-modal-form";
 
 function getBreadcrumbs(pathname: string) {
   const segments = pathname.split("/").filter(Boolean);
-  const crumbs: { title: string; url: string }[] = [
-    { title: "Home", url: "/" },
-  ]; // Always start with Home
+  const crumbs: { title: string; url: string }[] = [];
 
   let url = "";
   segments.forEach((segment) => {
