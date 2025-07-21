@@ -4,9 +4,7 @@ import AppLayout from "@/components/layouts/AppLayout";
 import FeedPage from "@/landing"; 
 import { waitForFirebaseAuth } from "@/lib/waitForAuth";
 
-
-
-export const Route = createFileRoute('/settings')({
+export const Route = createFileRoute('/trending')({
   beforeLoad: async () => {
     await waitForFirebaseAuth();
     const user = auth.currentUser;
@@ -18,5 +16,6 @@ export const Route = createFileRoute('/settings')({
     </AppLayout>
   ),
 })
+
 
 

@@ -6,7 +6,7 @@ import { waitForFirebaseAuth } from "@/lib/waitForAuth";
 
 
 
-export const Route = createFileRoute('/settings')({
+export const Route = createFileRoute('/alerts')({
   beforeLoad: async () => {
     await waitForFirebaseAuth();
     const user = auth.currentUser;
@@ -18,5 +18,4 @@ export const Route = createFileRoute('/settings')({
     </AppLayout>
   ),
 })
-
 

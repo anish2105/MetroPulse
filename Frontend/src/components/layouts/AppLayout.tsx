@@ -1,4 +1,5 @@
-import { AppSidebar } from "@/components/app-sidebar";
+// src/components/layouts/AppLayout.tsx
+import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import {
   Breadcrumb,
@@ -7,14 +8,19 @@ import {
   BreadcrumbLink,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { items } from "@/components/app-sidebar";
+import { items } from "@/components/sidebar/app-sidebar";
 import Header from "@/components/header";
-import {  useRouterState } from "@tanstack/react-router";
-import React from "react";
+import { useRouterState } from "@tanstack/react-router";
+import React, { useEffect, useState } from "react"; // Added useEffect and useState
+import { useAuth } from "@/context/AuthContext"; // Added useAuth
+import { Toaster } from "@/components/ui/sonner"; // Added Toaster for toasts
+import { MbtiModalForm } from "../mbti/mbti-modal-form";
 
 function getBreadcrumbs(pathname: string) {
   const segments = pathname.split("/").filter(Boolean);
-  const crumbs: { title: string; url: string }[] = [];
+  const crumbs: { title: string; url: string }[] = [
+    { title: "Home", url: "/" },
+  ]; // Always start with Home
 
   let url = "";
   segments.forEach((segment) => {
@@ -40,10 +46,29 @@ export default function AppLayout({
   const pathname = location.pathname;
   const breadcrumbs = getBreadcrumbs(pathname);
 
+  // MBTI Modal State and Logic
+  const { user, loading } = useAuth();
+  const [showMbtiModal, setShowMbtiModal] = useState(false);
+
+  useEffect(() => {
+    // Show if: not loading, user is logged in, and user.mbtiType is null/undefined
+    if (!loading && user && !user.mbtiType) {
+      const timer = setTimeout(() => {
+        setShowMbtiModal(true);
+      }, 10000);
+      return () => clearTimeout(timer); // Cleanup timer on unmount
+      // setShowMbtiModal(true);
+    } else {
+      setShowMbtiModal(false); // Hide if logged out or MBTI type is already set
+    }
+  }, [user, loading]); // Dependencies: re-run if user or loading state changes
+
   return (
     <SidebarProvider>
       <AppSidebar />
       <main className="w-full h-full">
+        {" "}
+        {/* This is your main tag */}
         <div className="px-4 flex border-b items-center gap-4">
           <SidebarTrigger />
           <Breadcrumb>
@@ -62,7 +87,15 @@ export default function AppLayout({
           </Breadcrumb>
           <Header />
         </div>
-        {children}
+        {children}{" "}
+        {/* This is where your route content (ProfilePage etc.) renders */}
+        {/* MBTI Modal Form - Placed here to overlay the entire layout */}
+        <MbtiModalForm
+          isOpen={showMbtiModal}
+          onClose={() => setShowMbtiModal(false)}
+        />
+        {/* Toaster for notifications */}
+        <Toaster />
       </main>
     </SidebarProvider>
   );

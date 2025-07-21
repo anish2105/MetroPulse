@@ -1,10 +1,14 @@
-import type { User } from "firebase/auth";
+import type { AppUser } from "./User";
 
 export interface AuthContextType {
-  user: User | null;
+  user: AppUser | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
+  updateMbtiTypeInFirestore: (
+    uid: string,
+    mbtiType: string | null
+  ) => Promise<void>;
 }

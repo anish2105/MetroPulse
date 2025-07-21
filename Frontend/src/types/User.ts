@@ -1,3 +1,8 @@
 import type { User } from "firebase/auth";
 
-export type AppUser = User;
+export interface AppUser extends User {
+     name: string;
+     email: string;
+     avatar: string;
+     mbtiType?: string | null;
+}

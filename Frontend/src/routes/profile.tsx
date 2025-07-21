@@ -1,12 +1,12 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { auth } from "@/firebase/config";
 import AppLayout from "@/components/layouts/AppLayout";
-import FeedPage from "@/landing"; 
 import { waitForFirebaseAuth } from "@/lib/waitForAuth";
+import { ProfilePage } from "@/components/profile";
 
 
 
-export const Route = createFileRoute('/settings')({
+export const Route = createFileRoute('/profile')({
   beforeLoad: async () => {
     await waitForFirebaseAuth();
     const user = auth.currentUser;
@@ -14,9 +14,8 @@ export const Route = createFileRoute('/settings')({
   },
   component: () => (
     <AppLayout>
-      <FeedPage />
+     <ProfilePage /> 
     </AppLayout>
   ),
 })
-
 
