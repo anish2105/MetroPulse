@@ -1,3 +1,4 @@
 .env
 sturdy*
 *.pyc
+*.egg-info
