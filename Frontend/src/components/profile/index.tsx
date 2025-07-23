@@ -40,9 +40,7 @@ export function ProfilePage() {
           <p>
             <strong>Email:</strong> {user.email || "N/A"}
           </p>
-          <p>
-            <strong>UID:</strong> {user.uid}
-          </p>
+         
         </CardContent>
       </Card>
 

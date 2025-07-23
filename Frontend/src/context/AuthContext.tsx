@@ -41,7 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       avatar: firebaseUser.photoURL || "default-avatar.png",
       mbtiType: null, // Initialize to null
     };
-
+    console.log("Transformed FirebaseUser to AppUser:", baseAppUser);
     // Fetch user's custom data (including mbtiType) from Firestore
     try {
       const userDocRef = doc(db, "users", firebaseUser.uid);
@@ -51,6 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const userData = userDocSnap.data();
         // Merge Firestore data with baseAppUser, prioritizing Firestore data
         // Ensure mbtiType is explicitly handled
+        console.log("Fetched user data from Firestore:", userData);
         return {
           ...baseAppUser,
           ...userData, // This will override name, email, avatar if present in Firestore
