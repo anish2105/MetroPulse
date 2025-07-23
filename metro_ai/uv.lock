@@ -951,7 +951,7 @@ wheels = [
 [[package]]
 name = "metro-ai"
 version = "0.1.0"
-source = { editable = "." }
+source = { virtual = "." }
 dependencies = [
     { name = "cloudpickle" },
     { name = "google-adk" },

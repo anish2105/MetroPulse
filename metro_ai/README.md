@@ -136,6 +136,37 @@ Commands are executed using `uv run`. Ensure your virtual environment is active.
     uv run deploy-remote --cleanup-all
     ```
 
+## Deploying an Agent to Google Cloud Run
+
+### Prerequisites
+
+- **Google Cloud SDK (`gcloud`)**: Install and authenticate. [Instructions here](https://cloud.google.com/sdk/docs/install).
+- **Project Root `Dockerfile.template`**: Ensure a `Dockerfile.template` exists in the project root with the following content:
+
+    ```Dockerfile
+    # Use the official ADK base image
+    FROM us-docker.pkg.dev/agent-development-kit/adk-images/adk-agent-base:latest
+
+    # Copy the agent-specific code and dependencies
+    COPY requirements.txt .
+    RUN pip install --no-cache-dir -r requirements.txt
+
+    # The __AGENT_DIR__ placeholder will be replaced by the script
+    COPY agents/__AGENT_DIR__ /app/agents/__AGENT_DIR__
+
+    # Set the agent directory environment variable for the ADK
+    ENV AGENT_DIR=__AGENT_DIR__
+
+    # Run the agent
+    CMD ["adk", "run"]
+    ```
+
+---
+
+### Step 1: Set Up Your Environment
+
+Set environment variables for your Google Cloud project:
+
 ## Project Structure
 
 ```
