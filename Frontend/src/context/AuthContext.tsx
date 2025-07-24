@@ -105,8 +105,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           {
             lastLogin: new Date(),
             // You might want to update displayName/photoURL here if they can change
-            // name: firebaseUser.displayName || "",
-            // avatar: firebaseUser.photoURL || "",
+            name: firebaseUser.displayName || "",
+            avatar: firebaseUser.photoURL || "",
           },
           { merge: true }
         );
