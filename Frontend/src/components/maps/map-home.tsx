@@ -1,128 +1,212 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from "react";
-import MapVS from "./Map";
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useCallback, useRef, useState } from "react";
+import {
+  GoogleMap,
+  Marker,
+  useJsApiLoader,
+  InfoWindow,
+  HeatmapLayer,
+} from "@react-google-maps/api";
 import type { Location } from "@/types/Location";
-import { doc, updateDoc } from "firebase/firestore";
-import { auth, db } from "@/firebase/config";
 
-// Update User Location in Firestore with proper types
-async function updateUserLocationInDB(
-  userId: string,
-  location: Location,
-  cityName: string,
-): Promise<void> {
-  console.log(
-    `Updating DB for user ${userId} with location:`,
-    location,
-    `and city: ${cityName}`,
-  );
-  const userRef = doc(db, "users", userId);
-  await updateDoc(userRef, {
-    location: location,
-    city: cityName,
-  });
-  
+// Extend Location type for the UserLocation in AppUser, which includes city
+
+// Define EventData and HeatmapPoint interfaces (must match MapHome)
+interface EventData {
+  id: string;
+  name: string;
+  type: "positive" | "negative" | "neutral";
+  latitude: number;
+  longitude: number;
+  description: string;
+  date: string;
+  time: string;
 }
 
-const RADIUS_IN_METERS = 2000; // 3 km radius
+interface HeatmapPoint {
+  latitude: number;
+  longitude: number;
+  weight: number;
+}
 
-const MapHome = () => {
-  const [location, setLocation] = useState<Location | null>(null);
-  const [city, setCity] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+interface Props {
+  location: Location;
+  radius?: number;
+  events: EventData[]; // New prop for events
+  heatmapData: HeatmapPoint[]; // New prop for heatmap data
+}
 
-  useEffect(() => {
-    const fetchLocationAndCity = async () => {
-      if (!navigator.geolocation) {
-        setError("Geolocation is not supported by your browser");
-        setLoading(false);
-        return;
-      }
+const containerStyle = {
+  width: "50%",
+  height: "500px",
+};
 
-      navigator.geolocation.getCurrentPosition(
-        async (pos) => {
-          const coords: Location = {
-            latitude: pos.coords.latitude,
-            longitude: pos.coords.longitude,
-          };
-          setLocation(coords);
+// Define map styles to hide labels (from previous step)
+const mapStyles = [
+  {
+    elementType: "labels",
+    stylers: [{ visibility: "off" }],
+  },
+];
 
-          let detectedCity = "";
-          try {
-            // Use reverse geocoding to get the city name
-            const response = await fetch(
-              `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coords.latitude},${coords.longitude}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`,
-            );
-            const data = await response.json();
-            const addressComponents = data.results[0]?.address_components;
-            const cityComponent = addressComponents?.find((c: any) =>
-              c.types.includes("locality"),
-            );
-            if (cityComponent) {
-              detectedCity = cityComponent.long_name;
-              setCity(detectedCity);
-            } else {
-              console.warn("City component not found in geocoding results.");
-            }
-          } catch (geoError) {
-            console.error("Error during reverse geocoding:", geoError);
-          } finally {
-            setLoading(false);
-            // If current user exists, update location in DB
-            const currentUser = auth.currentUser;
-            if (currentUser && coords) {
-              try {
-                await updateUserLocationInDB(
-                  currentUser.uid,
-                  coords as Location,
-                  detectedCity,
-                );
-                console.log("User location and city updated in DB!");
-              } catch (dbError) {
-                console.error("Failed to update user location in DB:", dbError);
-              }
-            } else {
-              console.warn("No current user or location data to update in DB.");
-            }
-          }
-        },
-        (geoError) => {
-          setError(
-            `Geolocation error: ${geoError.message}. Please enable location services.`,
+// Function to calculate approximate bounds for a circle
+const calculateBounds = (
+  center: { lat: number; lng: number },
+  radius: number // in meters
+) => {
+  const EARTH_RADIUS = 6378137; // meters
+  const latRadian = (radius / EARTH_RADIUS) * (180 / Math.PI);
+  const lngRadian =
+    ((radius / EARTH_RADIUS) * (180 / Math.PI)) /
+    Math.cos((center.lat * Math.PI) / 180);
+
+  const southWest = {
+    lat: center.lat - latRadian,
+    lng: center.lng - lngRadian,
+  };
+  const northEast = {
+    lat: center.lat + latRadian,
+    lng: center.lng + lngRadian,
+  };
+
+  return { southWest, northEast };
+};
+
+const MapHome: React.FC<Props> = ({
+  location,
+  radius,
+  events,
+  heatmapData,
+}) => {
+  const mapRef = useRef<google.maps.Map | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<EventData | null>(null);
+
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+    libraries: ["visualization"], // Required for HeatmapLayer
+  });
+
+  const centerLatLng = location.latitude
+    ? { lat: location.latitude, lng: location.longitude }
+    : { lat: 0, lng: 0 };
+
+  const onLoad = useCallback(
+    (map: google.maps.Map) => {
+      mapRef.current = map;
+      // If events are available, extend bounds to include them
+      if (events && events.length > 0) {
+        const bounds = new google.maps.LatLngBounds();
+        bounds.extend(centerLatLng);
+        events.forEach((event) => {
+          bounds.extend(
+            new google.maps.LatLng(event.latitude, event.longitude)
           );
-          setLoading(false);
-          console.error("Geolocation error:", geoError);
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 0,
-        },
-      );
-    };
-
-    fetchLocationAndCity();
+        });
+        map.fitBounds(bounds);
+      } else if (
+        radius &&
+        radius > 0 &&
+        location.latitude != null &&
+        location.longitude != null
+      ) {
+        const boundsData = calculateBounds(centerLatLng, radius);
+        const bounds = new google.maps.LatLngBounds(
+          boundsData.southWest,
+          boundsData.northEast
+        );
+        map.fitBounds(bounds);
+      } else {
+        map.setZoom(12);
+      }
+    },
+    [centerLatLng, events, location, radius]
+  );
+  const onUnmount = useCallback(() => {
+    mapRef.current = null;
   }, []);
 
+  // Heatmap layer options (customize colors, radius, opacity)
+  const heatmapOptions = {
+    radius: 20, // Affects the size of the blurred area
+    opacity: 0.6, // Overall opacity of the heatmap
+    // gradient: [
+    //   'rgba(0, 255, 255, 0)',
+    //   'rgba(0, 255, 255, 1)',
+    //   'rgba(0, 191, 255, 1)',
+    //   'rgba(0, 127, 255, 1)',
+    //   'rgba(0, 63, 255, 1)',
+    //   'rgba(0, 0, 191, 1)',
+    //   'rgba(0, 0, 127, 1)',
+    //   'rgba(0, 0, 63, 1)'
+    // ]
+  };
+
+  if (!isLoaded) return <p>Loading map...</p>;
+
   return (
-    <div>
-      <h1>Google Maps Location Viewer</h1>
-      {loading ? (
-        <p>Fetching location and updating database...</p>
-      ) : error ? (
-        <p style={{ color: "red" }}>Error: {error}</p>
-      ) : location ? (
-        <>
-          <p>
-            Your city: <strong>{city || "Unknown"}</strong>
-          </p>
-          <MapVS location={location} radius={RADIUS_IN_METERS} />
-        </>
-      ) : (
-        <p>No location available.</p>
+    <GoogleMap
+      mapContainerStyle={containerStyle}
+      center={centerLatLng}
+      onLoad={onLoad}
+      onUnmount={onUnmount}
+      options={{
+        styles: mapStyles,
+        disableDefaultUI: true,
+        zoomControl: true,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false,
+        keyboardShortcuts: false,
+      }}
+    >
+      {/* User's Location Marker */}
+      <Marker position={centerLatLng} />
+
+      {/* Event Markers */}
+      {events.map((event) => (
+        <Marker
+          key={event.id}
+          position={{ lat: event.latitude, lng: event.longitude }}
+          onClick={() => setSelectedEvent(event)} // Set selected event on click
+        />
+      ))}
+
+      {/* Info Window for Selected Event */}
+      {selectedEvent && (
+        <InfoWindow
+          position={{
+            lat: selectedEvent.latitude,
+            lng: selectedEvent.longitude,
+          }}
+          onCloseClick={() => setSelectedEvent(null)} // Close info window
+        >
+          <div style={{ padding: "10px" }}>
+            <h3>{selectedEvent.name}</h3>
+            <p>
+              <strong>Type:</strong> {selectedEvent.type}
+            </p>
+            <p>
+              <strong>Date:</strong> {selectedEvent.date}
+            </p>
+            <p>
+              <strong>Time:</strong> {selectedEvent.time}
+            </p>
+            <p>{selectedEvent.description}</p>
+            {/* Add more event details here */}
+          </div>
+        </InfoWindow>
       )}
-    </div>
+
+      {/* Heatmap Layer */}
+      {heatmapData.length > 0 && (
+        <HeatmapLayer
+          options={heatmapOptions}
+          data={heatmapData.map(
+            (point) => new google.maps.LatLng(point.latitude, point.longitude)
+          )}
+        />
+      )}
+    </GoogleMap>
   );
 };
 
