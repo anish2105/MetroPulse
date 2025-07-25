@@ -2,8 +2,8 @@
 import { useEffect, useState } from "react";
 
 import type { Location } from "@/types/Location";
-import { doc, updateDoc } from "firebase/firestore";
-import { auth, db } from "@/firebase/config";
+// import { doc, updateDoc } from "firebase/firestore";
+// import { auth, db } from "@/firebase/config";
 import MapHome from "./map-home";
 
 // Extend the Location type with an optional city field.
@@ -102,16 +102,16 @@ const fetchHeatmapApi = async (): Promise<HeatmapPoint[]> => {
 };
 
 // Update user's location in Firestore.
-async function updateUserLocationInDB(
-  userId: string,
-  userLocation: UserLocation
-): Promise<void> {
-  console.log(`Updating DB for user ${userId} with location:`, userLocation);
-  const userRef = doc(db, "users", userId);
-  await updateDoc(userRef, {
-    location: userLocation,
-  });
-}
+// async function updateUserLocationInDB(
+//   userId: string,
+//   userLocation: UserLocation
+// ): Promise<void> {
+//   console.log(`Updating DB for user ${userId} with location:`, userLocation);
+//   const userRef = doc(db, "users", userId);
+//   await updateDoc(userRef, {
+//     location: userLocation,
+//   });
+// }
 
 const MapVS = () => {
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
@@ -179,17 +179,17 @@ const MapVS = () => {
       setUserLocation(currentCoords);
 
       // 3. Update DB if user and location available
-      const currentUser = auth.currentUser;
-      if (currentUser && currentCoords) {
-        try {
-          await updateUserLocationInDB(currentUser.uid, currentCoords);
-          console.log("User location updated in DB!");
-        } catch (dbError) {
-          console.error("Failed to update user location in DB:", dbError);
-        }
-      } else {
-        console.warn("No current user or location data to update in DB.");
-      }
+      // const currentUser = auth.currentUser;
+      // if (currentUser && currentCoords) {
+      //   try {
+      //     await updateUserLocationInDB(currentUser.uid, currentCoords);
+      //     console.log("User location updated in DB!");
+      //   } catch (dbError) {
+      //     console.error("Failed to update user location in DB:", dbError);
+      //   }
+      // } else {
+      //   console.warn("No current user or location data to update in DB.");
+      // }
 
       // 4. Fetch Events Data
       try {
@@ -220,25 +220,18 @@ const MapVS = () => {
   }, []);
 
   return (
-    <div className="flex flex-col justify-center items-center  ">
-      <h1>Google Maps Location Viewer</h1>
+    <div className="flex flex-col justify-center items-center">
       {loading ? (
-        <p>Fetching location, events, and heatmap data...</p>
+        <p>Loading...</p>
       ) : error ? (
         <p style={{ color: "red", whiteSpace: "pre-wrap" }}>Error: {error}</p>
       ) : userLocation ? (
-        <>
-          <p>
-            Your city:{" "}
-            <strong>{userLocation.city || "Unknown (No city found)"}</strong>
-          </p>
-          <MapHome
-            location={userLocation}
-            radius={RADIUS_IN_METERS}
-            events={events}
-            heatmapData={heatmapData}
-          />
-        </>
+        <MapHome
+          location={userLocation}
+          radius={RADIUS_IN_METERS}
+          events={events}
+          heatmapData={heatmapData}
+        />
       ) : (
         <p>No location available. Cannot display map.</p>
       )}

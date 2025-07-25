@@ -1,19 +1,9 @@
-import { Bell, MapPin, Plus } from "lucide-react";
+import { Bell,  Plus } from "lucide-react";
 
 const Header = () => {
   return (
-    <header className="ml-auto px-4 py-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <MapPin className="w-6 h-6 text-blue-400" />
-            <span className="text-sm font-medium ">
-              Bengaluru, Karnataka
-            </span>
-          </div>
-        </div>
-
-        <div className="flex items-center space-x-4">
+    <header className="flex justify-center items-center ml-auto px-4 h-[8vh]">
+      <div className="flex items-center justify-center gap-3">
           <button className="relative p-2  ">
             <Bell className="w-5 h-5" />
             <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
@@ -23,7 +13,6 @@ const Header = () => {
             <Plus className="w-4 h-4" />
             <span>Report Event</span>
           </button>
-        </div>
       </div>
     </header>
   );

@@ -5,8 +5,8 @@ import {
   Calendar,
   Eye,
   User, // This is the Lucide-React User icon
-  Settings,
   GalleryVerticalEnd,
+  BotIcon,
 } from "lucide-react";
 
 import {
@@ -21,7 +21,6 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { Link } from "@tanstack/react-router";
-import { ModeToggle } from "../ui/mode-toggle";
 import { useAuth } from "@/context/AuthContext";
 
 import { NavUser } from "./nav-user";
@@ -43,6 +42,11 @@ export const items = [
     icon: MapPin,
   },
   {
+    title: "Chat",
+    url: "/chat",
+    icon: BotIcon,
+  },
+  {
     title: "Alerts",
     url: "/alerts",
     icon: AlertTriangle,
@@ -61,11 +65,6 @@ export const items = [
     title: "Profile",
     url: "/profile",
     icon: User, // This correctly refers to the Lucide-React icon
-  },
-  {
-    title: "Settings",
-    url: "/settings",
-    icon: Settings,
   },
 ];
 
@@ -114,7 +113,6 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <ModeToggle />
         <NavUser user={user!} />
       </SidebarFooter>
     </Sidebar>

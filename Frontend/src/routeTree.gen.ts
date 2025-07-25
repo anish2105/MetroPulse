@@ -10,22 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TrendingRouteImport } from './routes/trending'
-import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as MapRouteImport } from './routes/map'
 import { Route as FeedRouteImport } from './routes/feed'
 import { Route as EventsRouteImport } from './routes/events'
+import { Route as ChatRouteImport } from './routes/chat'
 import { Route as AlertsRouteImport } from './routes/alerts'
 import { Route as IndexRouteImport } from './routes/index'
 
 const TrendingRoute = TrendingRouteImport.update({
   id: '/trending',
   path: '/trending',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -48,6 +43,11 @@ const EventsRoute = EventsRouteImport.update({
   path: '/events',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChatRoute = ChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AlertsRoute = AlertsRouteImport.update({
   id: '/alerts',
   path: '/alerts',
@@ -62,32 +62,32 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/alerts': typeof AlertsRoute
+  '/chat': typeof ChatRoute
   '/events': typeof EventsRoute
   '/feed': typeof FeedRoute
   '/map': typeof MapRoute
   '/profile': typeof ProfileRoute
-  '/settings': typeof SettingsRoute
   '/trending': typeof TrendingRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/alerts': typeof AlertsRoute
+  '/chat': typeof ChatRoute
   '/events': typeof EventsRoute
   '/feed': typeof FeedRoute
   '/map': typeof MapRoute
   '/profile': typeof ProfileRoute
-  '/settings': typeof SettingsRoute
   '/trending': typeof TrendingRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/alerts': typeof AlertsRoute
+  '/chat': typeof ChatRoute
   '/events': typeof EventsRoute
   '/feed': typeof FeedRoute
   '/map': typeof MapRoute
   '/profile': typeof ProfileRoute
-  '/settings': typeof SettingsRoute
   '/trending': typeof TrendingRoute
 }
 export interface FileRouteTypes {
@@ -95,42 +95,42 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/alerts'
+    | '/chat'
     | '/events'
     | '/feed'
     | '/map'
     | '/profile'
-    | '/settings'
     | '/trending'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/alerts'
+    | '/chat'
     | '/events'
     | '/feed'
     | '/map'
     | '/profile'
-    | '/settings'
     | '/trending'
   id:
     | '__root__'
     | '/'
     | '/alerts'
+    | '/chat'
     | '/events'
     | '/feed'
     | '/map'
     | '/profile'
-    | '/settings'
     | '/trending'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AlertsRoute: typeof AlertsRoute
+  ChatRoute: typeof ChatRoute
   EventsRoute: typeof EventsRoute
   FeedRoute: typeof FeedRoute
   MapRoute: typeof MapRoute
   ProfileRoute: typeof ProfileRoute
-  SettingsRoute: typeof SettingsRoute
   TrendingRoute: typeof TrendingRoute
 }
 
@@ -141,13 +141,6 @@ declare module '@tanstack/react-router' {
       path: '/trending'
       fullPath: '/trending'
       preLoaderRoute: typeof TrendingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -178,6 +171,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/chat': {
+      id: '/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof ChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/alerts': {
       id: '/alerts'
       path: '/alerts'
@@ -198,11 +198,11 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AlertsRoute: AlertsRoute,
+  ChatRoute: ChatRoute,
   EventsRoute: EventsRoute,
   FeedRoute: FeedRoute,
   MapRoute: MapRoute,
   ProfileRoute: ProfileRoute,
-  SettingsRoute: SettingsRoute,
   TrendingRoute: TrendingRoute,
 }
 export const routeTree = rootRouteImport

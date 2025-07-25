@@ -7,6 +7,7 @@ export interface AppUser extends User {
      avatar?: string;
      bio?: string;
      mbtiType?: string | null;
+     enableMbti? : boolean;
      location?: Location
 }
 

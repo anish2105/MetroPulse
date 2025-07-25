@@ -1,16 +1,44 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { ModeToggle } from "../ui/mode-toggle";
 import { MbtiModalForm } from "../mbti/mbti-modal-form";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "@/firebase/config";
+import { Separator } from "../ui/separator";
 
 export function ProfilePage() {
   const { user, loading } = useAuth();
   const [showMbtiEditModal, setShowMbtiEditModal] = useState(false);
+  const [mbtiEnabled, setMbtiEnabled] = useState(false);
+
+  useEffect(() => {
+    if (user?.enableMbti !== undefined) {
+      setMbtiEnabled(user.enableMbti);
+    }
+  }, [user]);
+
+  const handleMbtiEnabled = async () => {
+    try {
+      const newEnabledState = !mbtiEnabled;
+      setMbtiEnabled(newEnabledState);
+
+      if (user) {
+        const userRef = doc(db, "users", user.uid);
+        await updateDoc(userRef, {
+          enableMbti: newEnabledState,
+        });
+      }
+    } catch (error) {
+      console.error("Error updating MBTI preference:", error);
+      setMbtiEnabled(mbtiEnabled);
+    }
+  };
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex justify-center items-center h-screen text-lg font-semibold">
         Loading profile...
       </div>
     );
@@ -25,44 +53,62 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="container mx-auto p-4 max-w-2xl">
-      <h1 className="text-3xl font-bold mb-6">User Profile</h1>
+    <div className="flex flex-col gap-5 p-3">
+      {/* Avatar and Name */}
+      <div className="flex items-center space-x-6">
+        {user.avatar ? (
+          <img
+            src={user.avatar}
+            alt={`${user.name}'s avatar`}
+            className="w-24 h-24 rounded-full object-cover border-2 border-blue-500"
+          />
+        ) : (
+          <div className="w-24 h-24 rounded-full bg-blue-500 flex items-center justify-center text-5xl font-bold text-white">
+            {user.name ? user.name.charAt(0).toUpperCase() : "U"}
+          </div>
+        )}
+        <div className="flex-col ">
+          <h1 className="text-2xl font-bold">{user.name || "Unnamed User"}</h1>
+          <p className="text-lg">{user.email || "Unnamed User"}</p>
+        </div>
+      </div>
 
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Basic Information</CardTitle>
-          <CardDescription>Details about your account.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <p>
-            <strong>Name:</strong> {user.name || "N/A"}
-          </p>
-          <p>
-            <strong>Email:</strong> {user.email || "N/A"}
-          </p>
-         
-        </CardContent>
-      </Card>
+      <Separator />
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold">Personality Type (MBTI)</h2>
+        <Switch
+          checked={mbtiEnabled}
+          onCheckedChange={handleMbtiEnabled}
+          aria-label="Enable MBTI"
+        />
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Personality Type (MBTI)</CardTitle>
-          <CardDescription>Your reported MBTI type.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-lg font-semibold">
-            Your MBTI Type:{" "}
-            <span className="text-blue-600">
-              {user.mbtiType || "Not set yet"}
-            </span>
+      {mbtiEnabled ? (
+        <div className="flex items-center justify-between">
+          <p className="text-lg font-semibold text-blue-600">
+            {user.mbtiType || "Not set yet"}
           </p>
-          <Button onClick={() => setShowMbtiEditModal(true)}>
-            {user.mbtiType ? "Edit MBTI Type" : "Set Your MBTI Type"}
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setShowMbtiEditModal(true)}
+          >
+            {user.mbtiType ? "Edit MBTI Type" : "Set MBTI Type"}
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      ) : (
+        <p className="italic text-gray-500">MBTI is disabled.</p>
+      )}
 
-      {/* MBTI Edit Modal (same component, different trigger) */}
+      <Separator />
+
+      <div className="flex items-center justify-between">
+        <p className="text-xl font-semibold">Theme</p>
+        <ModeToggle />
+      </div>
+
+      <Separator />
+      {/* MBTI Edit Modal */}
       <MbtiModalForm
         isOpen={showMbtiEditModal}
         onClose={() => setShowMbtiEditModal(false)}

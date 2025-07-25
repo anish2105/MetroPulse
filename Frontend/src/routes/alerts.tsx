@@ -1,12 +1,10 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { auth } from "@/firebase/config";
 import AppLayout from "@/components/layouts/AppLayout";
-import FeedPage from "@/components/landing"; 
 import { waitForFirebaseAuth } from "@/lib/waitForAuth";
+import AlertsHome from "@/components/alerts/index";
 
-
-
-export const Route = createFileRoute('/alerts')({
+export const Route = createFileRoute("/alerts")({
   beforeLoad: async () => {
     await waitForFirebaseAuth();
     const user = auth.currentUser;
@@ -14,8 +12,7 @@ export const Route = createFileRoute('/alerts')({
   },
   component: () => (
     <AppLayout>
-      <FeedPage />
+      <AlertsHome />
     </AppLayout>
   ),
-})
-
+});

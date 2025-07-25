@@ -65,7 +65,6 @@ export default function AppLayout({
     <SidebarProvider>
       <AppSidebar />
       <main className="w-full h-full">
-        {" "}
         {/* This is your main tag */}
         <div className="px-4 flex border-b items-center gap-4">
           <SidebarTrigger />

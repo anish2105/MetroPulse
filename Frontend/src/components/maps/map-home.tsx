@@ -37,8 +37,8 @@ interface Props {
 }
 
 const containerStyle = {
-  width: "50%",
-  height: "500px",
+  width: "100%",
+  height: "91vh", // Use viewport height to ensure the map fills the space
 };
 
 // Define map styles to hide labels (from previous step)
