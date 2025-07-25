@@ -1,6 +1,6 @@
 import {
   Zap,
-  MapPin,
+  // MapPin,
   AlertTriangle,
   Calendar,
   Eye,
@@ -36,11 +36,11 @@ export const items = [
     url: "/feed",
     icon: Zap,
   },
-  {
-    title: "City Map",
-    url: "/map",
-    icon: MapPin,
-  },
+  // {
+  //   title: "City Map",
+  //   url: "/map",
+  //   icon: MapPin,
+  // },
   {
     title: "Chat",
     url: "/chat",

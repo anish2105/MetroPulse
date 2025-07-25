@@ -7,15 +7,30 @@ import { MbtiModalForm } from "../mbti/mbti-modal-form";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { Separator } from "../ui/separator";
+import { Input } from "../ui/input";
+import { toast } from "sonner";
+import { CustomBadge } from "../ui/custom-badge";
 
 export function ProfilePage() {
   const { user, loading } = useAuth();
   const [showMbtiEditModal, setShowMbtiEditModal] = useState(false);
   const [mbtiEnabled, setMbtiEnabled] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [newCategory, setNewCategory] = useState("");
+  const [radius, setRadius] = useState<number>(2);
+  const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
     if (user?.enableMbti !== undefined) {
       setMbtiEnabled(user.enableMbti);
+    }
+    if (user?.notificationsEnabled !== undefined) {
+      setNotificationsEnabled(user.notificationsEnabled);
+    }
+    if (user?.preferences) {
+      setCategories(user.preferences.categories || []);
+      setRadius(user.preferences.radius || 2);
     }
   }, [user]);
 
@@ -36,6 +51,79 @@ export function ProfilePage() {
     }
   };
 
+  const handleNotificationsEnabled = async () => {
+    try {
+      const newEnabledState = !notificationsEnabled;
+      setNotificationsEnabled(newEnabledState);
+
+      if (user) {
+        const userRef = doc(db, "users", user.uid);
+        await updateDoc(userRef, {
+          notificationsEnabled: newEnabledState,
+        });
+      }
+    } catch (error) {
+      console.error("Error updating notifications preference:", error);
+      setNotificationsEnabled(notificationsEnabled);
+    }
+  };
+
+  const handleAddCategory = async (
+    event: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (event.key === "Enter" && newCategory.trim() !== "") {
+      const updatedCategories = [...categories, newCategory.trim()];
+      setCategories(updatedCategories);
+      setNewCategory("");
+
+      if (user) {
+        const userRef = doc(db, "users", user.uid);
+        await updateDoc(userRef, {
+          "preferences.categories": updatedCategories,
+        });
+      }
+    }
+  };
+
+  const handleRemoveCategory = async (categoryToRemove: string) => {
+    const updatedCategories = categories.filter(
+      (category) => category !== categoryToRemove
+    );
+    setCategories(updatedCategories);
+
+    if (user) {
+      const userRef = doc(db, "users", user.uid);
+      await updateDoc(userRef, {
+        "preferences.categories": updatedCategories,
+      });
+    }
+  };
+
+  const handleRadiusChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newRadius = Number(event.target.value);
+    if (newRadius >= 2) {
+      setRadius(newRadius);
+      setIsDirty(true);
+    }
+  };
+
+  const handleSaveRadius = async () => {
+    if (!isDirty) return;
+
+    if (user) {
+      try {
+        const userRef = doc(db, "users", user.uid);
+        await updateDoc(userRef, {
+          "preferences.radius": radius,
+        });
+        toast.success("Radius updated successfully");
+        setIsDirty(false);
+      } catch {
+        toast.error("Failed to update radius");
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen text-lg font-semibold">
@@ -53,7 +141,7 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="flex flex-col gap-5 p-3">
+    <div className="flex flex-col gap-5 p-3 w-2/3 mx-auto">
       {/* Avatar and Name */}
       <div className="flex items-center space-x-6">
         {user.avatar ? (
@@ -103,11 +191,64 @@ export function ProfilePage() {
       <Separator />
 
       <div className="flex items-center justify-between">
-        <p className="text-xl font-semibold">Theme</p>
+        <p className="text-xl font-semibold">Dark Theme</p>
         <ModeToggle />
       </div>
 
       <Separator />
+      <div className="flex items-center justify-between">
+        <p className="text-xl font-semibold">Notifications</p>
+        <Switch
+          checked={notificationsEnabled}
+          onCheckedChange={handleNotificationsEnabled}
+          aria-label="Enable Notifications"
+        />
+      </div>
+      <Separator />
+
+      {/* Categories Section */}
+      <div>
+        <h2 className="text-xl font-semibold">Categories</h2>
+
+        <Input
+          type="text"
+          value={newCategory}
+          onChange={(e) => setNewCategory(e.target.value)}
+          onKeyDown={handleAddCategory}
+          placeholder="Add a category and press Enter"
+          className="border border-gray-300 rounded-md p-2 mt-2 w-full"
+        />
+        <div className="flex flex-wrap gap-2 mt-2">
+          {categories.map((category, index) => (
+            <CustomBadge
+              key={index}
+              onRemove={() => handleRemoveCategory(category)}
+            >
+              {category}
+            </CustomBadge>
+          ))}
+        </div>
+      </div>
+
+      <Separator />
+
+      {/* Radius Input */}
+      <div className="flex items-center justify-between">
+        <p className="text-xl font-semibold">Radius (in km)</p>
+        <div className="flex items-center gap-2">
+          <Input
+            type="number"
+            value={radius}
+            onChange={handleRadiusChange}
+            className="border border-gray-300 rounded-md p-1 w-24"
+            min={2}
+            placeholder="2"
+          />
+          <Button size="sm" onClick={handleSaveRadius} disabled={!isDirty}>
+            Save
+          </Button>
+        </div>
+      </div>
       {/* MBTI Edit Modal */}
       <MbtiModalForm
         isOpen={showMbtiEditModal}

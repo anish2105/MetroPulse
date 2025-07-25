@@ -8,7 +8,12 @@ export interface AppUser extends User {
      bio?: string;
      mbtiType?: string | null;
      enableMbti? : boolean;
+     notificationsEnabled?: boolean;
      location?: Location
+     preferences? :{
+          radius: number;
+          categories : string[];
+     }
 }
 
 export type AppUserWithLocation = Pick<AppUser, "location"| "uid">;

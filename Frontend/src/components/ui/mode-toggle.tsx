@@ -1,7 +1,5 @@
-import { Moon, Sun } from "lucide-react"
 import { Switch } from "@/components/ui/switch"
 import { useTheme } from "@/components/ui/theme-provider"
-import { Label } from "@/components/ui/label"
 
 export function ModeToggle() {
   const { setTheme, theme } = useTheme()
@@ -13,13 +11,13 @@ export function ModeToggle() {
         checked={theme === "dark"}
         onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
       />
-      <Label htmlFor="theme-mode" className="cursor-pointer">
+      {/* <Label htmlFor="theme-mode" className="cursor-pointer">
         {theme === "dark" ? (
           <Moon className="h-[1.2rem] w-[1.2rem]" />
         ) : (
           <Sun className="h-[1.2rem] w-[1.2rem]" />
         )}
-      </Label>
+      </Label> */}
     </div>
   )
 }

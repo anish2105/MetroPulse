@@ -1,20 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
-
-import type { Location } from "@/types/Location";
-// import { doc, updateDoc } from "firebase/firestore";
-// import { auth, db } from "@/firebase/config";
+import { useLocationStore } from "@/store/location-store";
 import MapHome from "./map-home";
 
 // Extend the Location type with an optional city field.
 export type UserLocation = Location;
-
-// Fallback location (Nagarbhavi)
-const NAGARBHAVI_LOCATION: UserLocation = {
-  latitude: 12.9644,
-  longitude: 77.5147,
-  city: "Bengaluru",
-};
 
 const RADIUS_IN_METERS = 2000;
 
@@ -114,7 +103,7 @@ const fetchHeatmapApi = async (): Promise<HeatmapPoint[]> => {
 // }
 
 const MapVS = () => {
-  const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
+  const { location, fetchLocation } = useLocationStore();
   const [events, setEvents] = useState<EventData[]>([]);
   const [heatmapData, setHeatmapData] = useState<HeatmapPoint[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -125,99 +114,29 @@ const MapVS = () => {
       setLoading(true);
       setError(null);
 
-      let currentCoords: UserLocation | null = null;
-      let detectedCity = "";
-
-      // 1. Get Geolocation
-      if (navigator.geolocation) {
-        try {
-          const position = await new Promise<GeolocationPosition>(
-            (resolve, reject) => {
-              navigator.geolocation.getCurrentPosition(resolve, reject, {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 0,
-              });
-            }
-          );
-          // Set currentCoords from geolocation
-          currentCoords = {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          };
-
-          // 2. Reverse Geocode to get city
-          const response = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${currentCoords.latitude},${currentCoords.longitude}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`
-          );
-          const data = await response.json();
-          const addressComponents = data.results[0]?.address_components;
-          const cityComponent = addressComponents?.find((c: any) =>
-            c.types.includes("locality")
-          );
-          if (cityComponent) {
-            detectedCity = cityComponent.long_name;
-            currentCoords.city = detectedCity;
-          } else {
-            console.warn("City component not found in geocoding results.");
-          }
-        } catch (geoError: any) {
-          console.error("Geolocation or reverse geocoding error:", geoError);
-          setError(
-            `Geolocation error: ${geoError.message || "Failed to get location."}. Using default.`
-          );
-          currentCoords = NAGARBHAVI_LOCATION;
-        }
-      } else {
-        setError(
-          "Geolocation is not supported by your browser. Using default."
-        );
-        currentCoords = NAGARBHAVI_LOCATION;
+      // Only fetch location if we don't have it yet
+      if (!location) {
+        await fetchLocation();
       }
 
-      // Update state with the determined location (either real or fallback)
-      setUserLocation(currentCoords);
-
-      // 3. Update DB if user and location available
-      // const currentUser = auth.currentUser;
-      // if (currentUser && currentCoords) {
-      //   try {
-      //     await updateUserLocationInDB(currentUser.uid, currentCoords);
-      //     console.log("User location updated in DB!");
-      //   } catch (dbError) {
-      //     console.error("Failed to update user location in DB:", dbError);
-      //   }
-      // } else {
-      //   console.warn("No current user or location data to update in DB.");
-      // }
-
-      // 4. Fetch Events Data
       try {
+        // Fetch Events Data
         const fetchedEvents = await fetchEventsApi();
         setEvents(fetchedEvents);
-      } catch (eventError) {
-        console.error("Failed to fetch events:", eventError);
-        setError(
-          (prev) => (prev ? prev + "\n" : "") + "Failed to fetch events."
-        );
-      }
 
-      // 5. Fetch Heatmap Data
-      try {
+        // Fetch Heatmap Data
         const fetchedHeatmapData = await fetchHeatmapApi();
         setHeatmapData(fetchedHeatmapData);
-      } catch (heatmapError) {
-        console.error("Failed to fetch heatmap data:", heatmapError);
-        setError(
-          (prev) => (prev ? prev + "\n" : "") + "Failed to fetch heatmap data."
-        );
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setError("Failed to fetch data");
       }
 
       setLoading(false);
     };
 
     fetchAllData();
-  }, []);
+  }, [location, fetchLocation]);
 
   return (
     <div className="flex flex-col justify-center items-center">
@@ -225,9 +144,9 @@ const MapVS = () => {
         <p>Loading...</p>
       ) : error ? (
         <p style={{ color: "red", whiteSpace: "pre-wrap" }}>Error: {error}</p>
-      ) : userLocation ? (
+      ) : location ? (
         <MapHome
-          location={userLocation}
+          location={location}
           radius={RADIUS_IN_METERS}
           events={events}
           heatmapData={heatmapData}

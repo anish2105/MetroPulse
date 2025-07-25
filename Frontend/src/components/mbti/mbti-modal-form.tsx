@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner"; 
@@ -18,41 +17,7 @@ interface MbtiModalFormProps {
   onClose: () => void;
 }
 
-// Simple questions to derive MBTI dichotomies
-const mbtiQuestions = [
-  {
-    id: "ei",
-    question: "When interacting with others, do you usually feel...",
-    options: [
-      { value: "E", label: "Energized (Extroversion)" },
-      { value: "I", label: "Drained (Introversion)" },
-    ],
-  },
-  {
-    id: "sn",
-    question: "When making decisions, do you focus more on...",
-    options: [
-      { value: "S", label: "Facts and details (Sensing)" },
-      { value: "N", label: "Big picture and possibilities (Intuition)" },
-    ],
-  },
-  {
-    id: "tf",
-    question: "When evaluating things, do you tend to be more...",
-    options: [
-      { value: "T", label: "Objective and logical (Thinking)" },
-      { value: "F", label: "Empathetic and harmonious (Feeling)" },
-    ],
-  },
-  {
-    id: "jp",
-    question: "Regarding your daily life, are you generally more...",
-    options: [
-      { value: "J", label: "Organized and planned (Judging)" },
-      { value: "P", label: "Flexible and spontaneous (Perceiving)" },
-    ],
-  },
-];
+
 
 export function MbtiModalForm({ isOpen, onClose }: MbtiModalFormProps) {
   const { user, updateMbtiTypeInFirestore } = useAuth(); // Get user and the update function
@@ -68,9 +33,7 @@ export function MbtiModalForm({ isOpen, onClose }: MbtiModalFormProps) {
     }
   }, [isOpen]);
 
-  const handleRadioChange = (questionId: string, value: string) => {
-    setAnswers((prev) => ({ ...prev, [questionId]: value }));
-  };
+
 
   const calculateMbtiType = (): string | null => {
     if (
@@ -142,39 +105,12 @@ export function MbtiModalForm({ isOpen, onClose }: MbtiModalFormProps) {
           <DialogTitle>Tell Us About Your Personality</DialogTitle>
           <DialogDescription>
             Help us understand you better by providing your MBTI type. You can
-            either answer a few quick questions or enter it manually if you
+            either answer a few quick questions <a target="_blank" href="https://www.16personalities.com/free-personality-test" className="italic underline cursor-pointer text-blue-300">here</a> or enter it manually if you
             already know it.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="grid gap-4 py-4">
-          {mbtiQuestions.map((q) => (
-            <div key={q.id} className="grid gap-2">
-              <Label className="text-sm font-medium">{q.question}</Label>
-              <RadioGroup
-                onValueChange={(value) => handleRadioChange(q.id, value)}
-                value={answers[q.id] || ""}
-                className="flex flex-col space-y-1"
-                disabled={isSubmitting || !!manualType} // Disable if manually typing
-              >
-                {q.options.map((option) => (
-                  <div
-                    key={option.value}
-                    className="flex items-center space-x-2"
-                  >
-                    <RadioGroupItem
-                      value={option.value}
-                      id={`${q.id}-${option.value}`}
-                    />
-                    <Label htmlFor={`${q.id}-${option.value}`}>
-                      {option.label}
-                    </Label>
-                  </div>
-                ))}
-              </RadioGroup>
-            </div>
-          ))}
-
-          <div className="relative flex py-5 items-center">
+        <form onSubmit={handleSubmit} className="grid gap-4">
+          <div className="relative flex py-4 items-center">
             <div className="flex-grow border-t border-gray-300"></div>
             <span className="flex-shrink mx-4 text-gray-500 text-sm">OR</span>
             <div className="flex-grow border-t border-gray-300"></div>
