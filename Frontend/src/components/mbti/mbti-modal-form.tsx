@@ -18,35 +18,17 @@ interface MbtiModalFormProps {
 }
 
 
-
 export function MbtiModalForm({ isOpen, onClose }: MbtiModalFormProps) {
   const { user, updateMbtiTypeInFirestore } = useAuth(); // Get user and the update function
-  const [answers, setAnswers] = useState<{ [key: string]: string }>({});
   const [manualType, setManualType] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Reset form when modal opens/closes
   useEffect(() => {
     if (isOpen) {
-      setAnswers({});
       setManualType("");
     }
   }, [isOpen]);
-
-
-
-  const calculateMbtiType = (): string | null => {
-    if (
-      answers.ei &&
-      answers.sn &&
-      answers.tf &&
-      answers.jp &&
-      Object.keys(answers).length === 4 // Ensure all questions answered
-    ) {
-      return `${answers.ei}${answers.sn}${answers.tf}${answers.jp}`;
-    }
-    return null;
-  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -63,14 +45,7 @@ export function MbtiModalForm({ isOpen, onClose }: MbtiModalFormProps) {
         setIsSubmitting(false);
         return;
       }
-    } else {
-      finalMbtiType = calculateMbtiType();
-      if (!finalMbtiType) {
-        toast.error("Please answer all questions or enter your type manually.");
-        setIsSubmitting(false);
-        return;
-      }
-    }
+    } 
 
     if (!user?.uid) {
       toast.error("User not authenticated.");
@@ -126,7 +101,6 @@ export function MbtiModalForm({ isOpen, onClose }: MbtiModalFormProps) {
               value={manualType}
               onChange={(e) => {
                 setManualType(e.target.value);
-                setAnswers({}); // Clear radio answers if typing manually
               }}
               className="col-span-3"
               disabled={isSubmitting}

@@ -1,25 +1,30 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   MapPin,
   Search,
- 
   Filter,
   Heart,
   MessageCircle,
   Share2,
- 
   Zap,
-
   X,
   Send,
 } from "lucide-react";
+import { useLocationStore } from "@/store/location-store";
 
-
-export default function MetroPulse(){
-  const [activeTab, ] = useState("feed");
+export default function MetroPulse() {
+  const [activeTab] = useState("feed");
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const { fetchLocation } = useLocationStore();
 
+  useEffect(() => {
+    const getLocation = async () => {
+      await fetchLocation();
+    };
+
+    getLocation();
+  }, [fetchLocation]);
   const events = [
     {
       id: 1,
@@ -156,13 +161,9 @@ export default function MetroPulse(){
     </div>
   );
 
- 
-
   return (
     <div className="min-h-screen bg-gray-800 flex">
-
       <div className="flex-1 flex flex-col">
-
         <main className="flex-1 p-6 pb-24">
           {activeTab === "feed" ? (
             <div className="max-w-4xl mx-auto">
@@ -385,5 +386,4 @@ export default function MetroPulse(){
       )}
     </div>
   );
-};
-
+}
