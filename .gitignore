@@ -3,3 +3,4 @@ sturdy*
 *.pyc
 *.egg-info
 *.db
+.log
