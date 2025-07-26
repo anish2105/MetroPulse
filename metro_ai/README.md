@@ -1,194 +1,173 @@
-# MetroPulse AI Agent
+# MetroPulse AI: Real-Time City Information Agent
 
-A Python-based agent for the MetroPulse system, built using Google's Agent Development Kit (ADK) and Vertex AI. This agent is designed to be authenticated via a Google Cloud Service Account.
+MetroPulse AI is a sophisticated, cloud-native agentic workflow built with the Google Agent Development Kit (ADK). Given a city name, it concurrently fetches real-time information on movie showtimes, restaurants, and concerts, validates the data, and archives it in Google Cloud Storage.
 
-## Prerequisites
+This project serves as a powerful demonstration of building resilient, production-ready AI systems that can handle the inconsistencies of real-world data.
 
-*   Python 3.12+
-*   [uv](https://github.com/astral-sh/uv) (Python package manager)
-*   Google Cloud Account and Project
-*   A Google Cloud Service Account with the following IAM roles:
-    *   `Vertex AI User`
-    *   `Storage Object Admin` (for the staging bucket)
-*   Google Cloud CLI (`gcloud`) installed and configured
+## Key Features
 
-## Installation
+-   **Concurrent Data Fetching:** Utilizes a `ParallelAgent` to gather information for movies, restaurants, and concerts simultaneously, ensuring rapid response times.
+-   **Robust Python-First Data Validation:** Leverages Pydantic schemas for strict, deterministic validation of the data structure and types *before* storage, ensuring data integrity.
+-   **Intelligent Self-Healing Capability:** Implements a fallback "Corrector Agent" within a retry loop. If the initial data fails validation, a powerful LLM is invoked specifically to fix the data based on the precise validation error, making the pipeline resilient to LLM inconsistencies.
+-   **Cloud-Native & Serverless:** Packaged as a Docker container and deployed on Google Cloud Run, providing a scalable, secure, and cost-effective FastAPI endpoint.
+-   **Pure Python Final Processing:** A custom `BaseAgent` handles all final validation, data cleaning, and storage logic in deterministic Python, using LLMs only when necessary for specialized tasks.
 
-1.  **Clone the Repository**
-    ```bash
-    git clone <your-repository-url>
-    cd MetroPulse
-    ```
+## System Architecture
 
-2.  **Install `uv`**
-    ```bash
-    curl -LsSf https://astral.sh/uv/install.sh | sh
-    ```
+The application follows a sequential pipeline that orchestrates a parallel data-gathering step followed by a robust, custom processing step.
 
-3.  **Create Virtual Environment and Install Dependencies**
-    ```bash
-    # Create the virtual environment in a .venv directory
-    uv venv
+```mermaid
+sequenceDiagram
+    participant User
+    participant Cloud Run (FastAPI)
+    participant Parallel Agents
+    participant FinalProcessor (Python Agent)
+    participant Corrector (LLM Agent)
+    participant GCS
 
-    # Install all dependencies from pyproject.toml
-    uv sync
-    ```
-
-4.  **Activate the Virtual Environment**
-    ```bash
-    source .venv/bin/activate
-    ```
-
-## Configuration
-
-This project uses a Service Account for authentication with Google Cloud.
-
-1.  **Create and Download Service Account Key**
-    *   Navigate to the [Service Accounts page](https://console.cloud.google.com/iam-admin/serviceaccounts) in the Google Cloud Console.
-    *   Select your service account or create a new one.
-    *   Go to the **Keys** tab, click **Add Key**, and choose **Create new key**.
-    *   Select **JSON** as the key type and click **Create**. A JSON file will be downloaded to your computer.
-
-2.  **Place the Credentials**
-    *   Move the downloaded JSON file into the root of this project and rename it to `credentials.json`.
-
-3.  **IMPORTANT: Secure Your Credentials**
-    The `credentials.json` file contains private keys and provides access to your cloud resources. **Never commit it to version control.** The `.gitignore` file in this project should already be configured to ignore `credentials.json`. Verify this line exists:
-    ```gitignore
-    # .gitignore
-    credentials.json
-    ```
-
-4.  **Create `.env` File**
-    *   Create a file named `.env` in the project root. You can copy the provided `.env.example` as a template.
-    *   Populate the `.env` file with your project-specific details. It will be loaded automatically by the deployment scripts.
-
-    ```bash
-    # .env
-    GOOGLE_GENAI_USE_VERTEXAI=TRUE
-    GOOGLE_APPLICATION_CREDENTIALS=credentials.json
-    GOOGLE_CLOUD_PROJECT=your-gcp-project-id
-    GOOGLE_CLOUD_LOCATION=us-central1
-    GOOGLE_CLOUD_STAGING_BUCKET=gs://your-unique-bucket-name
-    ```
-
-5.  **Configure `gcloud` CLI and Enable APIs**
-    This is still required for deploying and managing services.
-    ```bash
-    # Log in for CLI access (distinct from the service account)
-    gcloud auth login
-    gcloud config set project your-gcp-project-id
-
-    # Enable the necessary services for the project
-    gcloud services enable aiplatform.googleapis.com cloudbuild.googleapis.com run.googleapis.com
-    ```
-
-## Usage
-
-Commands are executed using `uv run`. Ensure your virtual environment is active.
-
-### Local Testing
-
-1.  **Create a Local Session**
-    ```bash
-    uv run deploy-local --create_session
-    ```
-
-2.  **List Local Sessions**
-    ```bash
-    uv run deploy-local --list_sessions
-    ```
-
-3.  **Send a Message to a Local Session**
-    ```bash
-    uv run deploy-local --send --session_id=<your-session-id> --message="What is the status of the Express line?"
-    ```
-
-### Remote Deployment (Google Cloud Run)
-
-1.  **Deploy the Agent**
-    ```bash
-    uv run deploy-remote --create
-    ```
-
-2.  **List Remote Deployments**
-    ```bash
-    uv run deploy-remote --list
-    ```
-
-3.  **Create a Session on a Deployed Agent**
-    ```bash
-    uv run deploy-remote --create_session --resource_id=<your-resource-id>
-    ```
-
-4.  **Send a Message to the Deployed Agent**
-    ```bash
-    uv run deploy-remote --send --resource_id=<your-resource-id> --session_id=<your-session-id> --message="Any delays at Central station?"
-    ```
-
-5.  **Delete a Specific Deployment**
-    ```bash
-    uv run deploy-remote --delete --resource_id=<your-resource-id>
-    ```
-
-6.  **Cleanup ALL Deployments (Use with Caution)**
-    ```bash
-    uv run deploy-remote --cleanup-all
-    ```
-
-## Deploying an Agent to Google Cloud Run
-
-### Prerequisites
-
-- **Google Cloud SDK (`gcloud`)**: Install and authenticate. [Instructions here](https://cloud.google.com/sdk/docs/install).
-- **Project Root `Dockerfile.template`**: Ensure a `Dockerfile.template` exists in the project root with the following content:
-
-    ```Dockerfile
-    # Use the official ADK base image
-    FROM us-docker.pkg.dev/agent-development-kit/adk-images/adk-agent-base:latest
-
-    # Copy the agent-specific code and dependencies
-    COPY requirements.txt .
-    RUN pip install --no-cache-dir -r requirements.txt
-
-    # The __AGENT_DIR__ placeholder will be replaced by the script
-    COPY agents/__AGENT_DIR__ /app/agents/__AGENT_DIR__
-
-    # Set the agent directory environment variable for the ADK
-    ENV AGENT_DIR=__AGENT_DIR__
-
-    # Run the agent
-    CMD ["adk", "run"]
-    ```
-
----
-
-### Step 1: Set Up Your Environment
-
-Set environment variables for your Google Cloud project:
+    User->>+Cloud Run (FastAPI): POST /get-city-info (city: "Bengaluru")
+    Cloud Run (FastAPI)->>+Parallel Agents: Run(city)
+    Parallel Agents-->>-Cloud Run (FastAPI): Return raw JSON strings (movies, restaurants, concerts)
+    Cloud Run (FastAPI)->>+FinalProcessor (Python Agent): Execute with raw data
+    loop Max 3 Attempts
+        FinalProcessor (Python Agent)->>FinalProcessor (Python Agent): 1. Validate data with Pydantic
+        alt Validation Succeeds
+            FinalProcessor (Python Agent)->>+GCS: Save validated JSON
+            GCS-->>-FinalProcessor (Python Agent): Success
+            break
+        else Validation Fails
+            FinalProcessor (Python Agent)->>+Corrector (LLM Agent): "Fix this data using this error message"
+            Corrector (LLM Agent)-->>-FinalProcessor (Python Agent): Return corrected JSON string
+        end
+    end
+    FinalProcessor (Python Agent)-->>-Cloud Run (FastAPI): Return final status message
+    Cloud Run (FastAPI)-->>-User: {"response": "Success! Data saved to gs://..."}
+```
 
 ## Project Structure
 
 ```
-MetroPulse/
-├── deployment/            # Deployment scripts (local.py, remote.py)
-├── metro_agent/           # Main agent package
-├── .venv/                 # Virtual environment (managed by uv)
-├── .env                   # Local environment variables (GIT IGNORED)
-├── .env.example           # Template for .env file
-├── credentials.json       # Service Account key (GIT IGNORED)
-├── pyproject.toml         # Project configuration and dependencies
-├── uv.lock                # Pinned dependency versions
-└── README.md              # This file
+metro_ai/
+├── agents/
+│   ├── common_tools/
+│   │   ├── __init__.py
+│   │   ├── schemas.py          # Central Pydantic models for data validation.
+│   │   └── data_handler.py     #  custom tool tos ave artifact in gcs.
+│   ├── concert_agent/
+│   │   └── agent.py            # Simple LLM agent to fetch concert data.
+│   ├── movie_agent/
+│   │   └── agent.py            # Simple LLM agent to fetch movie data.
+│   ├── restaurant_agent/
+│   │   └── agent.py            # Simple LLM agent to fetch restaurant data.
+│   ├── corrector_agent.py         # The specialist LLM agent for self-healing.
+│   ├── final_processor_agent.py # The custom Python agent for validation and storage.
+│   └── orchestrator_agent/
+│       └── agent.py            # Defines the master SequentialAgent pipeline.
+├── .env                        # Local environment variables (DO NOT COMMIT).
+├── .gcloudignore               # Files to ignore during gcloud deployment.
+├── .dockerignore               # Files to ignore during Docker build (IMPORTANT for security).
+├── Dockerfile                  # Instructions for building the container image.
+├── main.py                     # The FastAPI server application.
+├── requirements.txt            # Project dependencies.
+├── setup_gcp.sh                # One-time script to configure GCP project permissions.
+└── deploy.sh                   # Script to build and deploy the application to Cloud Run.
 ```
 
-## Troubleshooting
+## Google Cloud Setup (One-Time)
 
-1.  **Authentication Errors (`PermissionDenied`):**
-    *   Verify the `GOOGLE_APPLICATION_CREDENTIALS` in your `.env` file points to the correct JSON key file.
-    *   Ensure the Service Account has the required IAM roles (`Vertex AI User`, `Storage Object Admin`) in your GCP project.
-    *   Confirm the correct project ID is set in your `.env` file.
+Before deploying, you need to configure your Google Cloud project.
 
-2.  **Deployment Failures:**
-    *   Check the Cloud Build and Cloud Run logs in the Google Cloud Console for detailed error messages.
-    *   Ensure the staging bucket specified in `GOOGLE_CLOUD_STAGING_BUCKET` exists and the service account has permission to write to it.
+1.  **Enable APIs:** Ensure the following APIs are enabled in your GCP project:
+    -   Cloud Run API
+    -   Vertex AI API
+    -   Cloud Storage API
+    -   Cloud Build API
+    -   Artifact Registry API (often enabled with Cloud Build)
+
+2.  **Create a GCS Bucket:** Create a new Google Cloud Storage bucket to store the output artifacts.
+
+3.  **Configure `.env` file:** Create a `.env` file in the root of the project with your specific configuration:
+    ```env
+    # Vertex backend config
+    GOOGLE_CLOUD_LOCATION=us-central1
+    GOOGLE_CLOUD_STAGING_BUCKET=gs://your-bucket-name-here
+    GOOGLE_CLOUD_PROJECT=your-gcp-project-id-here
+
+    # Optional: If you have GOOGLE_APPLICATION_CREDENTIALS set for local dev, it will be used.
+    ```
+
+4.  **Run the Setup Script:** Make the script executable and run it once to grant the necessary IAM permissions to the Cloud Run service account.
+    ```bash
+    chmod +x setup_gcp.sh
+    ./setup_gcp.sh
+    ```
+
+## Local Development & Setup
+
+1.  **Clone the repository:**
+    ```bash
+    git clone <your-repo-url>
+    cd metro_ai
+    ```
+2.  **Create a Python virtual environment:**
+    ```bash
+    python -m venv .venv
+    source .venv/bin/activate
+    ```
+3.  **Install dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+4.  **Authenticate gcloud (for local runs):**
+    ```bash
+    gcloud auth application-default login
+    ```
+5.  **Run the FastAPI server locally:**
+    ```bash
+    uvicorn main:app --reload
+    ```    The server will be available at `http://127.0.0.1:8000`.
+
+## Deployment to Google Cloud Run
+
+The entire deployment process is automated with a single script.
+
+1.  **Ensure your `.env` file is correct.** The script reads from this file to configure the deployment.
+2.  **Make the script executable:**
+    ```bash
+    chmod +x deploy.sh
+    ```
+3.  **Run the deployment:**
+    ```bash
+    ./deploy.sh
+    ```
+    The script will build the container image using Cloud Build and deploy it to a new service on Cloud Run. It will output the final service URL upon completion.
+
+## API Usage
+
+You can interact with the deployed API using any HTTP client.
+
+### Sample Request (`curl`)
+
+Replace `<your-service-url>` with the URL provided after deployment.
+
+```bash
+curl -X POST "<your-service-url>/get-city-info" \
+-H "Content-Type: application/json" \
+-d '{"city": "Bengaluru"}'
+```
+
+### Sample Success Response
+
+```json
+{
+  "response": "Success! Data for Bengaluru was saved to GCS as 'city_data/bengaluru_20250727_013000.json' (Revision ID: 0)."
+}
+```
+
+### Sample Failure Response (after retries)
+
+```json
+{
+  "response": "ERROR: Failed to validate data after 3 attempts. Final error: <Pydantic validation error details>"
+}
+```
