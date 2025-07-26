@@ -23,7 +23,7 @@ export function ReportEventDialog() {
     images: [],
     videos: [],
   });
-  const { location, locality } = useLocationStore();
+  const { locality } = useLocationStore();
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -41,11 +41,7 @@ export function ReportEventDialog() {
       const eventData = {
         title: formData.get("title") as string,
         description: formData.get("description") as string,
-        location: {
-          latitude: location?.latitude,
-          longitude: location?.longitude,
-          area: locality,
-        },
+        location: locality, 
         media: {
           files: urls.map((url:any, index:any) => ({
             url,
