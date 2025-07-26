@@ -20,25 +20,29 @@ APP_NAME = "media_summary_agent"
 USER_ID = "user_1"
 SESSION_ID = "session_001"
 
-# def get_media_type(file_path: str) -> str:
-#     """Determine if file is image or video"""
-#     mime_type, _ = mimetypes.guess_type(file_path)
-#     if mime_type:
-#         if mime_type.startswith('image/'):
-#             return 'image'
-#         elif mime_type.startswith('video/'):
-#             return 'video'
-#     return 'unknown'
-
-# def get_mime_type(file_path: str) -> str:
-#     """Get MIME type for the file"""
-#     mime_type, _ = mimetypes.guess_type(file_path)
-#     return mime_type or 'application/octet-stream'
-
-# def read_file_as_bytes(file_path: str) -> bytes:
-#     """Read file as bytes"""
-#     with open(file_path, 'rb') as f:
-#         return f.read()
+def convert_media_file_details_to_media_files(media_file_details) -> List[Dict[str, Union[str, bytes]]]:
+    """
+    Convert MediaFileDetail objects to the format expected by create_media_content
+    
+    Args:
+        media_file_details: List of MediaFileDetail objects from FastAPI request
+        
+    Returns:
+        List of dictionaries with 'mime_type' and 'data' keys
+    """
+    converted_files = []
+    
+    for media_detail in media_file_details:
+        # Convert list of integers back to bytes
+        file_bytes = bytes(media_detail.bytes)
+        
+        converted_file = {
+            'mime_type': media_detail.mimeType,
+            'data': file_bytes
+        }
+        converted_files.append(converted_file)
+    
+    return converted_files
 
 def create_media_content(media_files: List[Union[str, Dict[str, Union[str, bytes]]]], analysis_prompt: str) -> types.Content:
     """Create content with media files and analysis prompt"""
@@ -71,6 +75,14 @@ def create_media_content(media_files: List[Union[str, Dict[str, Union[str, bytes
 
 async def analyze_media_async(media_files: list, system_prompt: str, analysis_prompt: str) -> str:
     """Analyze media files using Google ADK without function tools"""
+    
+    # Convert MediaFileDetail objects to expected format if needed
+    if media_files and hasattr(media_files[0], 'mimeType') and hasattr(media_files[0], 'bytes'):
+        # This is a list of MediaFileDetail objects, convert them
+        converted_media_files = convert_media_file_details_to_media_files(media_files)
+    else:
+        # This is already in the expected format (file paths or dicts)
+        converted_media_files = media_files
 
     media_agent = Agent(
         name="media_analysis_agent",
@@ -94,7 +106,7 @@ async def analyze_media_async(media_files: list, system_prompt: str, analysis_pr
         session_id=SESSION_ID
     )
 
-    content = create_media_content(media_files, analysis_prompt)
+    content = create_media_content(converted_media_files, analysis_prompt)
     final_response_text = "Agent did not produce a final response."
 
     async for event in runner.run_async(user_id=USER_ID, session_id=SESSION_ID, new_message=content):
@@ -110,6 +122,6 @@ async def analyze_media_async(media_files: list, system_prompt: str, analysis_pr
 async def analyze_media_files(media_files: list, system_prompt: str, analysis_prompt: str):
     """Sync wrapper for media analysis"""
     response = await analyze_media_async(media_files, system_prompt, analysis_prompt)
-    print("="*60)
-    print(response)
+    # print("="*60)
+    # print(response)
     return response

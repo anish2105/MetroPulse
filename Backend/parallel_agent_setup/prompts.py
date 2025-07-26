@@ -181,6 +181,10 @@ def merge_summary(event_summary, media_summary):
       - Risk assessment
       - Expected developments
       
+      Media Insights:
+      - Image/Video specific details
+      - IMPACT ASSESSMENT and location context
+      
       <Output Strcuture>
          "Location": "Specific location of the event with landmarks if available",
          "Eventtype": "One of the approved classification categories]",
