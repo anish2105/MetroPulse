@@ -44,22 +44,24 @@ export default function AppLayout({
   const pathname = location.pathname;
   const breadcrumbs = getBreadcrumbs(pathname);
 
+
   // MBTI Modal State and Logic
   const { user, loading } = useAuth();
   const [showMbtiModal, setShowMbtiModal] = useState(false);
+  const [modalShown, setModalShown] = useState(false); // Track if modal has been shown
 
   useEffect(() => {
-    // Show if: not loading, user is logged in, and user.mbtiType is null/undefined
-    if (!loading && user && !user.mbtiType) {
+    // Show if: not loading, user is logged in, user.mbtiType is null/undefined, and modal hasn't been shown
+    if (!loading && user && user.mbtiType == null && !modalShown) {
       const timer = setTimeout(() => {
         setShowMbtiModal(true);
+        setModalShown(true); // Set modalShown to true after showing the modal
       }, 10000);
       return () => clearTimeout(timer); // Cleanup timer on unmount
-      // setShowMbtiModal(true);
     } else {
       setShowMbtiModal(false); // Hide if logged out or MBTI type is already set
     }
-  }, [user, loading]); // Dependencies: re-run if user or loading state changes
+  }, [user, loading, modalShown]); // Dependencies: re-run if user, loading state, or modalShown changes
 
   return (
     <SidebarProvider>

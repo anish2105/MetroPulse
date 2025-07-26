@@ -106,12 +106,12 @@ const MapVS = () => {
   const { location, fetchLocation } = useLocationStore();
   const [events, setEvents] = useState<EventData[]>([]);
   const [heatmapData, setHeatmapData] = useState<HeatmapPoint[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  // const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchAllData = async () => {
-      setLoading(true);
+      // setLoading(true);
       setError(null);
 
       // Only fetch location if we don't have it yet
@@ -132,7 +132,7 @@ const MapVS = () => {
         setError("Failed to fetch data");
       }
 
-      setLoading(false);
+      // setLoading(false);
     };
 
     fetchAllData();
@@ -140,9 +140,11 @@ const MapVS = () => {
 
   return (
     <div className="flex flex-col justify-center items-center">
-      {loading ? (
-        <p>Loading...</p>
-      ) : error ? (
+      {
+      // loading ? (
+      //   <p>Loading...</p>
+      // ) : 
+      error ? (
         <p style={{ color: "red", whiteSpace: "pre-wrap" }}>Error: {error}</p>
       ) : location ? (
         <MapHome

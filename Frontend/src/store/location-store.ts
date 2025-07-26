@@ -68,7 +68,7 @@ export const useLocationStore = create<LocationState>((set) => ({
         `https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.latitude},${location.longitude}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`
       );
       const data = await response.json();
-      console.log(data);
+      console.log(data); // Log the response data
       const addressComponents = data.results[0]?.address_components;
       if (!addressComponents) throw new Error("No address components found");
 

@@ -5,6 +5,8 @@ import FeedPage from "@/components/landing";
 import { waitForFirebaseAuth } from "@/lib/waitForAuth";
 import MapVS from "@/components/maps/Map";
 import { useMapModeStore } from "@/store/map-mode-store";
+import { useLocationStore } from "@/store/location-store"; // Import the location store
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/feed")({
   beforeLoad: async () => {
@@ -17,5 +19,40 @@ export const Route = createFileRoute("/feed")({
 
 function FeedComponent() {
   const { isMapMode } = useMapModeStore();
-  return <AppLayout>{isMapMode ? <MapVS /> : <FeedPage />}</AppLayout>;
+  const { location, fetchLocation } = useLocationStore();
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchLocationData = async () => {
+      setLoading(true);
+      setError(null);
+
+      // Only fetch location if we don't have it yet
+      if (!location) {
+        console.log("Fetching location..."); // Log when fetching location
+        try {
+          await fetchLocation();
+          console.log("Location fetched successfully."); // Log on successful fetch
+        } catch (fetchError) {
+          console.error("Error fetching location:", fetchError);
+          setError("Failed to fetch location");
+        }
+      } else {
+        console.log("Location already available:", location); // Log if location is already available
+      }
+
+      setLoading(false);
+    };
+
+    fetchLocationData();
+  }, [location, fetchLocation]);
+
+  return (
+    <AppLayout>
+      {loading && <div>Loading...</div>}
+      {error && <div>Error: {error}</div>}
+      {isMapMode ? <MapVS /> : <FeedPage />}
+    </AppLayout>
+  );
 }
