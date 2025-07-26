@@ -1,0 +1,23 @@
+# Ignore Dockerfile and .dockerignore itself
+Dockerfile
+.dockerignore
+
+# Ignore git and gcloud files
+.git/
+.gitignore
+.gcloudignore
+
+# Ignore the service account key file
+*.json
+
+# Python build artifacts
+__pycache__/
+*.pyc
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Log files
+*.log
