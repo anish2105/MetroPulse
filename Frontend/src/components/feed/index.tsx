@@ -1,22 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
-import {
-  MapPin,
-  Search,
-  Filter,
-  Heart,
-  MessageCircle,
-  Share2,
-  Zap,
-  X,
-  Send,
-} from "lucide-react";
+import { MapPin } from "lucide-react";
 import { useLocationStore } from "@/store/location-store";
 
 export default function MetroPulse() {
   const [activeTab] = useState("feed");
-  const [selectedEvent, setSelectedEvent] = useState<any>(null);
-  const { fetchLocation } = useLocationStore();
+  const { fetchLocation, city } = useLocationStore();
 
   useEffect(() => {
     const getLocation = async () => {
@@ -71,10 +60,7 @@ export default function MetroPulse() {
   ];
 
   const EventCard = ({ event }: { event: any }) => (
-    <div
-      className="bg-white rounded-lg border border-gray-200 p-4 mb-4 hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:-translate-y-1"
-      onClick={() => setSelectedEvent(event)}
-    >
+    <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4 hover:shadow-lg transition-all duration-200  transform hover:-translate-y-1">
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center space-x-2">
           <div
@@ -102,27 +88,7 @@ export default function MetroPulse() {
         <span className="text-xs text-gray-500">{event.location}</span>
       </div>
 
-      {/* {event.image && (
-        <div className="w-full h-32 bg-gradient-to-br from-gray-100 to-gray-200 rounded-md mb-3 flex items-center justify-center">
-          <span className="text-gray-500 text-sm">📸 Image attached</span>
-        </div>
-      )} */}
-
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <button className="flex items-center space-x-1 text-gray-500 hover:text-red-500 transition-colors">
-            <Heart className="w-4 h-4" />
-            <span className="text-sm">{event.likes}</span>
-          </button>
-          <button className="flex items-center space-x-1 text-gray-500 hover:text-blue-500 transition-colors">
-            <MessageCircle className="w-4 h-4" />
-            <span className="text-sm">{event.comments}</span>
-          </button>
-          <button className="flex items-center space-x-1 text-gray-500 hover:text-green-500 transition-colors">
-            <Share2 className="w-4 h-4" />
-          </button>
-        </div>
-
         <div className="flex items-center space-x-2">
           {event.tags.map((tag: undefined) => (
             <span
@@ -167,36 +133,15 @@ export default function MetroPulse() {
         <main className="flex-1 p-6 pb-24">
           {activeTab === "feed" ? (
             <div className="max-w-4xl mx-auto">
-              <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-bold text-white">
-                  Live City Feed
-                </h1>
-                <button className="flex items-center space-x-2 text-gray-300 hover:text-white">
-                  <Filter className="w-4 h-4" />
-                  <span>Filter</span>
-                </button>
-              </div>
-
-              {/* AI Summary Banner */}
-              <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 rounded-lg mb-6 shadow-lg">
-                <div className="flex items-center space-x-2 mb-2">
-                  <Zap className="w-5 h-5" />
-                  <span className="font-semibold">AI-Powered City Pulse</span>
-                </div>
-                <p className="text-sm opacity-90">
-                  High activity detected in Brigade Road area. Power outages
-                  reported in Koramangala. 3 community events happening near you
-                  based on your ENFP profile.
-                </p>
-              </div>
+              
 
               {/* Events in Your Area */}
               <div className="mb-8">
                 <h2 className="text-lg font-semibold text-white mb-4">
-                  Events in Koramangala
+                  Events in {city}
                 </h2>
                 <div className="relative">
-                  <div className="flex space-x-4 overflow-x-auto scroll pb-4">
+                  <div className="grid grid-cols-2 gap-4">
                     {/* Event Card 1 */}
                     <div className="min-w-[280px] bg-gradient-to-br from-pink-50 to-rose-100 border border-pink-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
                       <div className="flex items-center justify-between mb-2">
@@ -277,6 +222,18 @@ export default function MetroPulse() {
                       </div>
                     </div>
                   </div>
+
+                  {/* More Events Button */}
+                  {events.length > 4 && (
+                    <div className="mt-4">
+                      <a
+                        href="/events"
+                        className="inline-block bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
+                      >
+                        More Events
+                      </a>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -288,7 +245,7 @@ export default function MetroPulse() {
               </div>
 
               {/* Events List */}
-              <div className="space-y-4">
+              <div className=" grid grid-cols-2 gap-2">
                 {events.map((event) => (
                   <EventCard key={event.id} event={event} />
                 ))}
@@ -314,7 +271,7 @@ export default function MetroPulse() {
             </div>
           )}
           {/* Floating Chat Search Bar */}
-          <div className="fixed bottom-6 left-[57%] transform -translate-x-1/2 w-full max-w-3xl px-6 z-40">
+          {/* <div className="fixed bottom-6 left-[57%] transform -translate-x-1/2 w-full max-w-3xl px-6 z-40">
             <div className="bg-gray-800 border border-gray-600 rounded-full shadow-2xl px-6 py-4 flex items-center space-x-4">
               <Search className="w-5 h-5 text-gray-400" />
               <input
@@ -326,64 +283,9 @@ export default function MetroPulse() {
                 <Send className="w-4 h-4" />
               </button>
             </div>
-          </div>
+          </div> */}
         </main>
       </div>
-
-      {selectedEvent && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-900">
-                  {selectedEvent.title}
-                </h2>
-                <button
-                  onClick={() => setSelectedEvent(null)}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <p className="text-gray-600 mb-4">{selectedEvent.description}</p>
-
-              <div className="flex items-center space-x-2 mb-4">
-                <MapPin className="w-4 h-4 text-gray-400" />
-                <span className="text-sm text-gray-500">
-                  {selectedEvent.location}
-                </span>
-              </div>
-
-              {selectedEvent.image && (
-                <div className="w-full h-48 bg-gray-100 rounded-md mb-4 flex items-center justify-center">
-                  <span className="text-gray-400">📸 Event Image</span>
-                </div>
-              )}
-
-              <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                <div className="flex items-center space-x-4">
-                  <button className="flex items-center space-x-1 text-blue-600 hover:text-blue-700">
-                    <Heart className="w-4 h-4" />
-                    <span className="text-sm">{selectedEvent.likes}</span>
-                  </button>
-                  <button className="flex items-center space-x-1 text-blue-600 hover:text-blue-700">
-                    <MessageCircle className="w-4 h-4" />
-                    <span className="text-sm">{selectedEvent.comments}</span>
-                  </button>
-                  <button className="flex items-center space-x-1 text-blue-600 hover:text-blue-700">
-                    <Share2 className="w-4 h-4" />
-                  </button>
-                </div>
-
-                {/* <span className="text-xs text-gray-500">
-                  MBTI Match: {selectedEvent.mbtiMatch}
-                </span> */}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
