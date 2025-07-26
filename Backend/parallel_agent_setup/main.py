@@ -1,3 +1,5 @@
+
+
 from typing import List
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -63,6 +65,7 @@ async def summarize_event(event: EventRequest):
         if media_file:
             media_summary_result = await analyze_media_files(media_file, media_system_pompt, analysis_media_prompt)
         print(media_summary_result)
+
         merger_system_prompt, merger_user_prompt = merge_summary(
             event_summary_result, media_summary_result
         )

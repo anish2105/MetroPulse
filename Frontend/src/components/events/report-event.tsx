@@ -1,6 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,11 +15,20 @@ import { Plus, Upload } from "lucide-react";
 import { useLocationStore } from "@/store/location-store";
 import { toast } from "sonner";
 import { uploadFilesToStorage } from "@/lib/upload";
+import { collection, addDoc, } from "firebase/firestore";
+import type { Event } from "@/types/Event";
+import { db } from "@/firebase/config";
+import { useAuth } from "@/context/AuthContext";
 
 const MAX_IMAGES = 3;
 const MAX_VIDEOS = 1;
-const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
-const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime'];
+const ALLOWED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/jpg",
+];
+const ALLOWED_VIDEO_TYPES = ["video/mp4", "video/webm", "video/quicktime"];
 
 export function ReportEventDialog() {
   const [selectedFiles, setSelectedFiles] = useState<{
@@ -24,58 +39,72 @@ export function ReportEventDialog() {
     videos: [],
   });
   const { locality } = useLocationStore();
+  const {user} = useAuth(); 
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-console.log("selected files", selectedFiles)
- const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-  setIsSubmitting(true);
+  console.log("selected files", selectedFiles);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
 
-  try {
-    const formData = new FormData(e.currentTarget);
+    try {
+      const formData = new FormData(e.currentTarget);
 
-    // Convert media to byte format (no backend upload)
-    const { mediaFiles } = await uploadFilesToStorage(selectedFiles);
+      // 1. First handle the existing API call with byte data
+      const { mediaFiles } = await uploadFilesToStorage(selectedFiles);
 
-    // Prepare full event payload with media bytes
-    const eventData = {
-      event_name: formData.get("title") as string,
-      event_description: formData.get("description") as string,
-      event_location: locality? locality : "Unknown",
-      media_file: mediaFiles,
-      // created_at: new Date().toISOString(),
-    };
+      const apiEventData = {
+        event_name: formData.get("title") as string,
+        event_description: formData.get("description") as string,
+        event_location: locality ? locality : "Unknown",
+        media_file: mediaFiles,
+      };
 
-    console.log("Prepared Event Data with Media Bytes:", eventData);
+      // Make the API call
+      const response = await fetch("http://localhost:8000/event_summary/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(apiEventData),
+      });
 
-    // Optional: send to backend if needed
-    
-    const response = await fetch('http://localhost:8000/event_summary/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(eventData),
-    });
+      if (!response.ok) {
+        throw new Error("Failed to create event in API");
+      }
 
-    if (!response.ok) {
-      throw new Error('Failed to create event');
+     
+
+      // 3. Store in Firestore
+      const firestoreEventData: Event = {
+        title: apiEventData.event_name,
+        description: apiEventData.event_description,
+        category: "general",
+        location: {
+          area: apiEventData.event_location,
+        },
+        creator: user ? {
+          uid: user.uid,
+          name: user.name,
+          avatar: user.avatar
+        } : null,
+        source: user ? "user" : "ai",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      await addDoc(collection(db, "events"), firestoreEventData);
+
+      toast.success("Event reported successfully!");
+      setIsOpen(false);
+      setSelectedFiles({ images: [], videos: [] });
+    } catch (error) {
+      console.error("Error preparing event:", error);
+      toast.error("Failed to prepare event. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    toast.success('Event reported successfully!');
-    
-
-    toast.success("Event prepared successfully");
-    setIsOpen(false);
-    setSelectedFiles({ images: [], videos: [] });
-  } catch (error) {
-    console.error("Error preparing event:", error);
-    toast.error("Failed to prepare event. Please try again.");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -84,7 +113,7 @@ console.log("selected files", selectedFiles)
     const newImages: File[] = [];
     const newVideos: File[] = [];
 
-    Array.from(files).forEach(file => {
+    Array.from(files).forEach((file) => {
       // Check if it's an image
       if (ALLOWED_IMAGE_TYPES.includes(file.type)) {
         if (selectedFiles.images.length + newImages.length >= MAX_IMAGES) {
@@ -105,15 +134,15 @@ console.log("selected files", selectedFiles)
       }
     });
 
-    setSelectedFiles(prev => ({
+    setSelectedFiles((prev) => ({
       images: [...prev.images, ...newImages],
       videos: [...prev.videos, ...newVideos],
     }));
   };
 
-  const removeFile = (type: 'image' | 'video', index: number) => {
-    setSelectedFiles(prev => {
-      if (type === 'image') {
+  const removeFile = (type: "image" | "video", index: number) => {
+    setSelectedFiles((prev) => {
+      if (type === "image") {
         return {
           ...prev,
           images: prev.images.filter((_, i) => i !== index),
@@ -130,9 +159,7 @@ console.log("selected files", selectedFiles)
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button 
-          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-        >
+        <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
           <Plus className="w-4 h-4 mr-2" />
           Report Event
         </Button>
@@ -151,7 +178,7 @@ console.log("selected files", selectedFiles)
               required
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
             <Textarea
@@ -176,12 +203,14 @@ console.log("selected files", selectedFiles)
                 id="files"
                 type="file"
                 multiple
-                accept={[...ALLOWED_IMAGE_TYPES, ...ALLOWED_VIDEO_TYPES].join(',')}
+                accept={[...ALLOWED_IMAGE_TYPES, ...ALLOWED_VIDEO_TYPES].join(
+                  ","
+                )}
                 className="hidden"
                 onChange={handleFileChange}
               />
-              <label 
-                htmlFor="files" 
+              <label
+                htmlFor="files"
                 className="flex flex-col items-center gap-2 cursor-pointer"
               >
                 <Upload className="w-8 h-8 text-muted-foreground" />
@@ -195,7 +224,8 @@ console.log("selected files", selectedFiles)
             </div>
 
             {/* Preview selected files */}
-            {(selectedFiles.images.length > 0 || selectedFiles.videos.length > 0) && (
+            {(selectedFiles.images.length > 0 ||
+              selectedFiles.videos.length > 0) && (
               <div className="space-y-2">
                 {selectedFiles.images.length > 0 && (
                   <div className="flex flex-wrap gap-2">
@@ -208,7 +238,7 @@ console.log("selected files", selectedFiles)
                         />
                         <button
                           type="button"
-                          onClick={() => removeFile('image', index)}
+                          onClick={() => removeFile("image", index)}
                           className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                           ×
@@ -217,7 +247,7 @@ console.log("selected files", selectedFiles)
                     ))}
                   </div>
                 )}
-                
+
                 {selectedFiles.videos.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {selectedFiles.videos.map((file, index) => (
@@ -227,7 +257,7 @@ console.log("selected files", selectedFiles)
                         </div>
                         <button
                           type="button"
-                          onClick={() => removeFile('video', index)}
+                          onClick={() => removeFile("video", index)}
                           className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                           ×
@@ -241,7 +271,11 @@ console.log("selected files", selectedFiles)
           </div>
 
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsOpen(false)}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
@@ -251,7 +285,7 @@ console.log("selected files", selectedFiles)
                   Submitting...
                 </>
               ) : (
-                'Submit Report'
+                "Submit Report"
               )}
             </Button>
           </div>

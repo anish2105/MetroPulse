@@ -1,12 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { auth } from "@/firebase/config";
 import AppLayout from "@/components/layouts/AppLayout";
-import FeedPage from "@/components/landing";
 import { waitForFirebaseAuth } from "@/lib/waitForAuth";
 import MapVS from "@/components/maps/Map";
 import { useMapModeStore } from "@/store/map-mode-store";
 import { useLocationStore } from "@/store/location-store"; // Import the location store
 import { useEffect, useState } from "react";
+import MetroPulse from "@/components/feed";
 
 export const Route = createFileRoute("/feed")({
   beforeLoad: async () => {
@@ -50,9 +51,8 @@ function FeedComponent() {
 
   return (
     <AppLayout>
-      {loading && <div>Loading...</div>}
       {error && <div>Error: {error}</div>}
-      {isMapMode ? <MapVS /> : <FeedPage />}
+      {isMapMode ? <MapVS /> : <MetroPulse />}
     </AppLayout>
   );
 }
