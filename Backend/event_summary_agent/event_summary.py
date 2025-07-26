@@ -10,6 +10,7 @@ from google.adk.tools import google_search
 from google.genai import types
 from prompt import event_summary_prompt
 from pydantic import BaseModel, Field
+from utils import convert_response_to_json
 
 load_dotenv()
 warnings.filterwarnings("ignore")
@@ -29,37 +30,31 @@ class EventSummaryOutput(BaseModel):
 async def get_summary_async(query: str , prompt:str) -> str:
     """Main function that sets up the agent, session, and runs the query."""
     
-    # Setup agent
     weather_agent = Agent(
-        name="weather_agent_v1",
+        name="event_summary_agent",
         model=AGENT_MODEL, 
         description="Provides summary for user events and creates a report about the event.",
         instruction=prompt,
         tools=[google_search], 
     )
 
-    # Session service
     session_service = InMemorySessionService()
 
-    # Runner
     runner = Runner(
         agent=weather_agent, 
         app_name=APP_NAME,   
         session_service=session_service 
     )
 
-    # Create session
     await session_service.create_session(
         app_name=APP_NAME,
         user_id=USER_ID,
         session_id=SESSION_ID
     )
 
-    # Prepare content
     content = types.Content(role='user', parts=[types.Part(text=query)])
     final_response_text = "Agent did not produce a final response."
 
-    # Run agent
     async for event in runner.run_async(user_id=USER_ID, session_id=SESSION_ID, new_message=content):
         if event.is_final_response():
             if event.content and event.content.parts:
@@ -67,8 +62,8 @@ async def get_summary_async(query: str , prompt:str) -> str:
             elif event.actions and event.actions.escalate:
                 final_response_text = f"Agent escalated: {event.error_message or 'No specific message.'}"
             break 
-
     return final_response_text
+
 
 def get_event_summary(query: str, prompt :str):
     """Sync wrapper for terminal or external call."""
@@ -84,4 +79,5 @@ if __name__ == "__main__":
     query = user_prompt
     prompt = system_prompt
     event_summary = get_event_summary(query,prompt)
-    print(event_summary)
+    parsed_event_summary = convert_response_to_json(event_summary)
+    print(parsed_event_summary)

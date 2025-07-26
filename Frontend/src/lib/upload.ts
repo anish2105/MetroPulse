@@ -1,32 +1,35 @@
 export async function uploadFilesToStorage(
   files: { images: File[]; videos: File[] }
-): Promise<{ urls: string[]; types: string[] }> {
+): Promise<{
+  mediaFiles: {
+    name: string;
+    type: string;
+    mimeType: string;
+    size: number;
+    bytes: Uint8Array;
+  }[];
+}> {
   const allFiles = [...files.images, ...files.videos];
-  const urls: string[] = [];
-  const types: string[] = [];
+  const mediaFiles: {
+    name: string;
+    type: string;
+    mimeType: string;
+    size: number;
+    bytes: Uint8Array;
+  }[] = [];
 
   for (const file of allFiles) {
-    // Create a byte array from the file
-    const bytes = await file.arrayBuffer();
-    // You'll need to implement your backend API endpoint
-    const response = await fetch('/api/upload', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/octet-stream',
-        'X-File-Type': file.type,
-        'X-File-Name': file.name,
-      },
-      body: bytes,
+    const arrayBuffer = await file.arrayBuffer();
+    const bytes = new Uint8Array(arrayBuffer); // Convert to byte array
+
+    mediaFiles.push({
+      name: file.name,
+      type: file.type.startsWith('image/') ? 'image' : 'video',
+      mimeType: file.type,
+      size: file.size,
+      bytes,
     });
-
-    if (!response.ok) {
-      throw new Error('Failed to upload file');
-    }
-
-    const { url } = await response.json();
-    urls.push(url);
-    types.push(file.type);
   }
 
-  return { urls, types };
+  return { mediaFiles };
 }

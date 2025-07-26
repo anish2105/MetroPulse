@@ -27,55 +27,57 @@ export function ReportEventDialog() {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  setIsSubmitting(true);
+
+  try {
+    const formData = new FormData(e.currentTarget);
+
+    // Convert media to byte format (no backend upload)
+    // const { mediaFiles } = await uploadFilesToStorage(selectedFiles);
+
+    // Prepare full event payload with media bytes
+    const eventData = {
+      event_name: formData.get("title") as string,
+      event_description: formData.get("description") as string,
+      event_location: locality? locality : "Unknown",
+      // media_file: {
+      //   files: mediaFiles,
+      // },
+      // created_at: new Date().toISOString(),
+    };
+
+    console.log("Prepared Event Data with Media Bytes:", eventData);
+
+    // Optional: send to backend if needed
     
-    try {
-      const formData = new FormData(e.currentTarget);
-      
-      // First upload the files
-      const { urls, types } = await uploadFilesToStorage(selectedFiles);
-      
-      // Prepare the event data
-      const eventData = {
-        title: formData.get("title") as string,
-        description: formData.get("description") as string,
-        location: locality, 
-        media: {
-          files: urls.map((url:any, index:any) => ({
-            url,
-            type: types[index],
-            mimeType: types[index],
-          })),
-        },
-        createdAt: new Date().toISOString(),
-      };
+    const response = await fetch('http://localhost:8000/event_summary/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(eventData),
+    });
 
-      console.log("Events Data", eventData)
-      // Send the event data to your backend
-      const response = await fetch('/api/events', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(eventData),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create event');
-      }
-
-      toast.success('Event reported successfully!');
-      setIsOpen(false);
-      setSelectedFiles({ images: [], videos: [] });
-    } catch (error) {
-      console.error('Error submitting event:', error);
-      toast.error('Failed to report event. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+    if (!response.ok) {
+      throw new Error('Failed to create event');
     }
-  };
+
+    toast.success('Event reported successfully!');
+    
+
+    toast.success("Event prepared successfully");
+    setIsOpen(false);
+    setSelectedFiles({ images: [], videos: [] });
+  } catch (error) {
+    console.error("Error preparing event:", error);
+    toast.error("Failed to prepare event. Please try again.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;

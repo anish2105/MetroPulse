@@ -181,15 +181,11 @@ def merge_summary(event_summary, media_summary):
       - Risk assessment
       - Expected developments
       
-   <Output Strcuture>
-      ```json
-      {{
-         "Location": "[Specific location of the event with landmarks if available]",
-         "Eventtype": "[One of the approved classification categories]",
-         "Eventname": "[Concise, descriptive name for the event (max 10 words)]",
-         "EventSummary": "[Format the response as a structured summary with clear sections and bullet points for easy reading.]"
-      }}
-      ```
+      <Output Strcuture>
+         "Location": "Specific location of the event with landmarks if available",
+         "Eventtype": "One of the approved classification categories]",
+         "Eventname": "Concise, descriptive name for the event (max 10 words)",
+         "EventSummary": "Format the response as a structured summary, adhering all the sections in multiple paragraphs, dont make bullet points and headers, just give simple text paragraghs"
       </Output Strcuture>
 
       <Quality Standards>
@@ -227,14 +223,10 @@ def merge_summary(event_summary, media_summary):
       - KEY INSIGHTS
       
       <Output Strcuture>
-      ```json
-      {{
-         "Location": "[Specific location of the event with landmarks if available]",
-         "Eventtype": "[One of the approved classification categories]",
-         "Eventname": "[Concise, descriptive name for the event (max 10 words)]",
-         "EventSummary": "[Format the response as a structured summary with clear sections and bullet points for easy reading.]"
-      }}
-      ```
+         "Location": "Specific location of the event with landmarks if available",
+         "Eventtype": "One of the approved classification categories]",
+         "Eventname": "Concise, descriptive name for the event (max 10 words)",
+         "EventSummary": "Format the response as a structured summary, adhering all the sections in multiple paragraphs, dont make bullet points and headers, just give simple text paragraghs"
       </Output Strcuture>
    """
    return system_prompt, user_prompt 

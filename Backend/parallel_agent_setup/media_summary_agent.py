@@ -40,34 +40,34 @@ SESSION_ID = "session_001"
 #     with open(file_path, 'rb') as f:
 #         return f.read()
 
-# def create_media_content(media_files: List[Union[str, Dict[str, Union[str, bytes]]]], analysis_prompt: str) -> types.Content:
-#     """Create content with media files and analysis prompt"""
-#     parts = [types.Part(text=analysis_prompt)]
+def create_media_content(media_files: List[Union[str, Dict[str, Union[str, bytes]]]], analysis_prompt: str) -> types.Content:
+    """Create content with media files and analysis prompt"""
+    parts = [types.Part(text=analysis_prompt)]
 
-#     for item in media_files:
-#         # Case 1: item is already a dict with mime_type and data
-#         if isinstance(item, dict) and 'mime_type' in item and 'data' in item:
-#             parts.append(types.Part(inline_data=types.Blob(
-#                 mime_type=item['mime_type'],
-#                 data=item['data']
-#             )))
-#         # Case 2: item is a file path string
-#         elif isinstance(item, str):
-#             if not os.path.exists(item):
-#                 print(f"Warning: File {item} not found, skipping...")
-#                 continue
+    for item in media_files:
+        # Case 1: item is already a dict with mime_type and data
+        if isinstance(item, dict) and 'mime_type' in item and 'data' in item:
+            parts.append(types.Part(inline_data=types.Blob(
+                mime_type=item['mime_type'],
+                data=item['data']
+            )))
+        # Case 2: item is a file path string
+        elif isinstance(item, str):
+            if not os.path.exists(item):
+                print(f"Warning: File {item} not found, skipping...")
+                continue
 
-#             mime_type = get_mime_type(item)
-#             file_data = read_file_as_bytes(item)
+            mime_type = get_mime_type(item)
+            file_data = read_file_as_bytes(item)
 
-#             parts.append(types.Part(inline_data=types.Blob(
-#                 mime_type=mime_type,
-#                 data=file_data
-#             )))
-#         else:
-#             print(f"Warning: Unsupported media item format: {item}")
+            parts.append(types.Part(inline_data=types.Blob(
+                mime_type=mime_type,
+                data=file_data
+            )))
+        else:
+            print(f"Warning: Unsupported media item format: {item}")
 
-#     return types.Content(role='user', parts=parts)
+    return types.Content(role='user', parts=parts)
 
 async def analyze_media_async(media_files: list, system_prompt: str, analysis_prompt: str) -> str:
     """Analyze media files using Google ADK without function tools"""
@@ -107,7 +107,7 @@ async def analyze_media_async(media_files: list, system_prompt: str, analysis_pr
 
     return final_response_text
 
-def analyze_media_files(media_files: list, system_prompt: str, analysis_prompt: str):
+async def analyze_media_files(media_files: list, system_prompt: str, analysis_prompt: str):
     """Sync wrapper for media analysis"""
-    response = asyncio.run(analyze_media_async(media_files, system_prompt, analysis_prompt))
+    response = await analyze_media_async(media_files, system_prompt, analysis_prompt)
     return response

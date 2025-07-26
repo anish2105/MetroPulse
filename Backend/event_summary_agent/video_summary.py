@@ -8,6 +8,7 @@ from google.adk.runners import Runner
 from google.adk.tools import google_search
 from google.genai import types
 import mimetypes
+from prompt import event_summary_prompt
 from typing import List, Dict
 
 load_dotenv()
@@ -17,6 +18,42 @@ AGENT_MODEL = "gemini-2.0-flash-exp"
 APP_NAME = "media_summary_agent"
 USER_ID = "user_1"
 SESSION_ID = "session_001"
+
+system_prompt = """You are an expert visual analyst specializing in event detection and assessment from images and videos. 
+    Analyze the provided media to extract:
+    - Event type and classification
+    - Location indicators and geographical context
+    - Severity assessment and impact level
+    - People, infrastructure, and environmental effects
+    - Timeline indicators if visible
+    - Safety and emergency response needs
+    
+    Provide structured, actionable insights with specific details observed in the media."""
+
+analysis_prompt = """Analyze these images/videos comprehensively and provide:
+
+    1. EVENT IDENTIFICATION:
+       - What type of event is occurring?
+       - What is the severity level?
+
+    2. VISUAL DETAILS:
+       - Describe what you see in detail
+       - Identify key elements and indicators
+
+    3. LOCATION & CONTEXT:
+       - Any location markers or identifiable features?
+       - Environmental and infrastructural context
+
+    4. IMPACT ASSESSMENT:
+       - Who/what is affected?
+       - Immediate and potential consequences
+
+    5. RECOMMENDATIONS:
+       - Immediate response needs
+       - Priority actions required
+
+    Be specific and detailed in your analysis."""
+
 
 def get_media_type(file_path: str) -> str:
     """Determine if file is image or video"""
@@ -103,113 +140,13 @@ def analyze_media_files(media_files: list, system_prompt: str, analysis_prompt: 
     response = asyncio.run(analyze_media_async(media_files, system_prompt, analysis_prompt))
     return response
 
-# Alternative approach using direct Gemini API (more reliable)
-def direct_media_analysis(file_paths: List[str], prompt: str) -> List[Dict[str, str]]:
-    """
-    Direct analysis using Gemini API without ADK complexity
-    
-    Args:
-        file_paths: List of image or video file paths
-        prompt: Analysis prompt
-        
-    Returns:
-        List of analysis results
-    """
-    import google.generativeai as genai
-    
-    # Configure Gemini
-    genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
-    model = genai.GenerativeModel("gemini-2.5-flash")
-    
-    results = []
-    
-    for file_path in file_paths:
-        if not os.path.exists(file_path):
-            results.append({
-                "file": os.path.basename(file_path),
-                "media_type": "unknown",
-                "summary": f"Error: File not found - {file_path}"
-            })
-            continue
-            
-        media_type = get_media_type(file_path)
-        
-        try:
-            print(f"Processing file: {file_path}")
-            
-            # Upload and analyze file
-            uploaded_file = genai.upload_file(file_path)
-            response = model.generate_content([uploaded_file, prompt])
-            
-            results.append({
-                "file": os.path.basename(file_path),
-                "media_type": media_type,
-                "summary": response.text
-            })
-            
-        except Exception as e:
-            results.append({
-                "file": os.path.basename(file_path),
-                "media_type": media_type,
-                "summary": f"Error processing file: {str(e)}"
-            })
-    
-    return results
 
-def batch_media_analysis(file_paths: List[str], analysis_prompt: str) -> str:
-    """Analyze multiple files and return combined summary"""
-    results = direct_media_analysis(file_paths, analysis_prompt)
-    
-    combined_summary = "=== MEDIA ANALYSIS RESULTS ===\n\n"
-    for result in results:
-        combined_summary += f"📁 File: {result['file']} ({result['media_type']})\n"
-        combined_summary += f"📋 Analysis: {result['summary']}\n"
-        combined_summary += "=" * 60 + "\n\n"
-    
-    return combined_summary
 
 if __name__ == "__main__":
-    # System prompt for the agent
-    system_prompt = """You are an expert visual analyst specializing in event detection and assessment from images and videos. 
-    Analyze the provided media to extract:
-    - Event type and classification
-    - Location indicators and geographical context
-    - Severity assessment and impact level
-    - People, infrastructure, and environmental effects
-    - Timeline indicators if visible
-    - Safety and emergency response needs
-    
-    Provide structured, actionable insights with specific details observed in the media."""
-    
-    analysis_prompt = """Analyze these images/videos comprehensively and provide:
-
-    1. EVENT IDENTIFICATION:
-       - What type of event is occurring?
-       - What is the severity level?
-
-    2. VISUAL DETAILS:
-       - Describe what you see in detail
-       - Identify key elements and indicators
-
-    3. LOCATION & CONTEXT:
-       - Any location markers or identifiable features?
-       - Environmental and infrastructural context
-
-    4. IMPACT ASSESSMENT:
-       - Who/what is affected?
-       - Immediate and potential consequences
-
-    5. RECOMMENDATIONS:
-       - Immediate response needs
-       - Priority actions required
-
-    Be specific and detailed in your analysis."""
-    
-    # Example media files (replace with your actual file paths)
     media_files = [
         r"D:\Projects\GenAI\Metropulse\Backend\local_media\bassi_1.mp4",
-                            r"D:\Projects\GenAI\Metropulse\Backend\local_media\bassi_image2.jpg",
-                            r"D:\Projects\GenAI\Metropulse\Backend\local_media\bassi_image1.jpg"
+        r"D:\Projects\GenAI\Metropulse\Backend\local_media\bassi_image2.jpg",
+        r"D:\Projects\GenAI\Metropulse\Backend\local_media\bassi_image1.jpg"
     ]
     
     print("=== ADK-based Media Analysis ===")

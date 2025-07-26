@@ -60,9 +60,10 @@ async def get_summary_async(query: str , prompt:str) -> str:
     return final_response_text
 
 
-def get_event_summary(query: str, prompt :str):
+async def get_event_summary(query: str, prompt :str):
     """Sync wrapper for terminal or external call."""
-    response = asyncio.run(get_summary_async(query,prompt))
+    # response = asyncio.run(get_summary_async(query,prompt))
+    response = await get_summary_async(query,prompt)
     # print(response)  #comment
     
     return response
