@@ -16,11 +16,11 @@ export interface Event {
     startTime: Timestamp;
     endTime: Timestamp;
   };
-  creator: Pick<AppUser, "uid" | "name" | "avatar">;
+  creator?: Pick<AppUser, "uid" | "name" | "avatar">;
   media: { //consider all mime types
     images: string[];
     videos?: string[];
-    thumbnail?: string;
+  
   };
   engagement: {
     likes: number;
@@ -29,7 +29,6 @@ export interface Event {
   source: EVENT_SOURCE;
   createdAt: Timestamp;
   updatedAt: Timestamp;
-  tags?: string[];
 }
 
 type EVENT_SOURCE = "ai" | "user"

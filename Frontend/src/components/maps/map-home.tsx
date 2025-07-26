@@ -5,7 +5,7 @@ import {
   Marker,
   useJsApiLoader,
   InfoWindow,
-  HeatmapLayer,
+  // HeatmapLayer,
 } from "@react-google-maps/api";
 import type { Location } from "@/types/Location";
 
@@ -76,7 +76,7 @@ const MapHome: React.FC<Props> = ({
   location,
   radius,
   events,
-  heatmapData,
+  // heatmapData,
 }) => {
   const mapRef = useRef<google.maps.Map | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<EventData | null>(null);
@@ -97,11 +97,11 @@ const MapHome: React.FC<Props> = ({
       if (events && events.length > 0) {
         const bounds = new google.maps.LatLngBounds();
         bounds.extend(centerLatLng);
-        events.forEach((event) => {
-          bounds.extend(
-            new google.maps.LatLng(event.latitude, event.longitude)
-          );
-        });
+        // events.forEach((event) => {
+        //   bounds.extend(
+        //     new google.maps.LatLng(event.latitude, event.longitude)
+        //   );
+        // });
         map.fitBounds(bounds);
       } else if (
         radius &&
@@ -126,20 +126,20 @@ const MapHome: React.FC<Props> = ({
   }, []);
 
   // Heatmap layer options (customize colors, radius, opacity)
-  const heatmapOptions = {
-    radius: 20, // Affects the size of the blurred area
-    opacity: 0.6, // Overall opacity of the heatmap
-    // gradient: [
-    //   'rgba(0, 255, 255, 0)',
-    //   'rgba(0, 255, 255, 1)',
-    //   'rgba(0, 191, 255, 1)',
-    //   'rgba(0, 127, 255, 1)',
-    //   'rgba(0, 63, 255, 1)',
-    //   'rgba(0, 0, 191, 1)',
-    //   'rgba(0, 0, 127, 1)',
-    //   'rgba(0, 0, 63, 1)'
-    // ]
-  };
+  // const heatmapOptions = {
+  //   radius: 20, // Affects the size of the blurred area
+  //   opacity: 0.6, // Overall opacity of the heatmap
+  //   // gradient: [
+  //   //   'rgba(0, 255, 255, 0)',
+  //   //   'rgba(0, 255, 255, 1)',
+  //   //   'rgba(0, 191, 255, 1)',
+  //   //   'rgba(0, 127, 255, 1)',
+  //   //   'rgba(0, 63, 255, 1)',
+  //   //   'rgba(0, 0, 191, 1)',
+  //   //   'rgba(0, 0, 127, 1)',
+  //   //   'rgba(0, 0, 63, 1)'
+  //   // ]
+  // };
 
   if (!isLoaded) return <p>Loading map...</p>;
 
@@ -198,14 +198,14 @@ const MapHome: React.FC<Props> = ({
       )}
 
       {/* Heatmap Layer */}
-      {heatmapData.length > 0 && (
+      {/* {heatmapData.length > 0 && (
         <HeatmapLayer
           options={heatmapOptions}
           data={heatmapData.map(
             (point) => new google.maps.LatLng(point.latitude, point.longitude)
           )}
         />
-      )}
+      )} */}
     </GoogleMap>
   );
 };
