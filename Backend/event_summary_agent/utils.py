@@ -1,7 +1,9 @@
 import googlemaps
+from dotenv import load_dotenv
+load_dotenv()
 
 def get_coordinates(address):
-    gmaps = googlemaps.Client(key='AIzaSyBgJg4-QFVbWFXX1hvNLp593efz4eXVOVM')
+    gmaps = googlemaps.Client()
     geocode_result = gmaps.geocode(address)
     
     if geocode_result:

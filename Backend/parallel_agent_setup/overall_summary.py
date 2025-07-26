@@ -66,6 +66,6 @@ async def get_overall_summary(query: str, prompt :str):
     # response = asyncio.run(get_summary_async(query,prompt))
     response = await get_summary_async(query,prompt)
     parsed_response = convert_response_to_json(response)
-    print(type(parsed_response))
+    # print(type(parsed_response))
     print(parsed_response)
     return parsed_response
