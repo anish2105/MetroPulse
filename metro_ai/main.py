@@ -27,13 +27,19 @@ async def main():
     if not BUCKET:
         raise ValueError("GOOGLE_CLOUD_STAGING_BUCKET environment variable not set.")
     
-    logger.info(f"Using GCS bucket: {BUCKET}")
+    # --- THIS IS THE FINAL FIX ---
+    # Sanitize the bucket name to remove the 'gs://' prefix if it exists.
+    if BUCKET.startswith("gs://"):
+        bucket_name = BUCKET[5:]
+    else:
+        bucket_name = BUCKET
+    # -----------------------------
     
-    # --- The GCS service is created here, as a dependency ---
-    artifact_service = GcsArtifactService(bucket_name=BUCKET)
+    logger.info(f"Using GCS bucket: {bucket_name}")
+    
+    artifact_service = GcsArtifactService(bucket_name=bucket_name)
     session_service = InMemorySessionService()
     
-    # --- The service is passed directly to the agent factory ---
     metro_pulse_agent = create_metro_pulse_agent(artifact_service=artifact_service)
 
     runner = Runner(
