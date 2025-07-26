@@ -3,7 +3,7 @@ import os
 import uvicorn
 from google.adk.cli.fast_api import get_fast_api_app
 
-AGENT_DIR = os.path.join(os.path.dirname(__file__), "metro_agent")
+AGENT_DIR = os.path.join(os.path.dirname(__file__), "metro_ai")
 SESSION_SERVICE_URI = os.environ.get("SESSION_SERVICE_URI", "sqlite:///./sessions.db")
 ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "*").split(",")
 SERVE_WEB_INTERFACE = True
