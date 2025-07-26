@@ -26,7 +26,7 @@ export function ReportEventDialog() {
   const { locality } = useLocationStore();
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+console.log("selected files", selectedFiles)
  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
   e.preventDefault();
   setIsSubmitting(true);
@@ -35,16 +35,14 @@ export function ReportEventDialog() {
     const formData = new FormData(e.currentTarget);
 
     // Convert media to byte format (no backend upload)
-    // const { mediaFiles } = await uploadFilesToStorage(selectedFiles);
+    const { mediaFiles } = await uploadFilesToStorage(selectedFiles);
 
     // Prepare full event payload with media bytes
     const eventData = {
       event_name: formData.get("title") as string,
       event_description: formData.get("description") as string,
       event_location: locality? locality : "Unknown",
-      // media_file: {
-      //   files: mediaFiles,
-      // },
+      media_file: mediaFiles,
       // created_at: new Date().toISOString(),
     };
 
