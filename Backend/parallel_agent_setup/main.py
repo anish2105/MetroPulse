@@ -92,6 +92,7 @@
 
 #     except Exception as e:
 #         return JSONResponse(status_code=500, content={"error": str(e)})
+
 from typing import List
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -153,8 +154,8 @@ async def summarize_event(event: EventRequest):
 
         # Merge with empty media summary
         media_system_pompt, analysis_media_prompt = media_prompts()
-        media_summary_result = await analyze_media_files(media_file, media_system_pompt, analysis_media_prompt)
-        print(media_summary_result)
+        media_summary_result = analyze_media_files(media_file, media_system_pompt, analysis_media_prompt)
+
         merger_system_prompt, merger_user_prompt = merge_summary(
             event_summary_result, media_summary_result
         )
