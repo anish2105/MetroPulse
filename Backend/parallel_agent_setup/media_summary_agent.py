@@ -52,7 +52,7 @@ def create_media_content(media_files: List[Union[str, Dict[str, Union[str, bytes
                 data=item['data']
             )))
         # Case 2: item is a file path string
-        elif isinstance(item, str):
+        elif isinstance(item, str): 
             if not os.path.exists(item):
                 print(f"Warning: File {item} not found, skipping...")
                 continue
@@ -110,4 +110,6 @@ async def analyze_media_async(media_files: list, system_prompt: str, analysis_pr
 async def analyze_media_files(media_files: list, system_prompt: str, analysis_prompt: str):
     """Sync wrapper for media analysis"""
     response = await analyze_media_async(media_files, system_prompt, analysis_prompt)
+    print("="*60)
+    print(response)
     return response
