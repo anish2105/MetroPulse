@@ -28,6 +28,7 @@ function FeedComponent() {
     const fetchLocationData = async () => {
       setLoading(true);
       setError(null);
+      if(loading) return <div>Loading...</div>
 
       // Only fetch location if we don't have it yet
       if (!location) {

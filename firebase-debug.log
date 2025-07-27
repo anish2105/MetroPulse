@@ -1,0 +1,21 @@
+[debug] [2025-07-27T05:04:11.640Z] ----------------------------------------------------------------------
+[debug] [2025-07-27T05:04:11.654Z] Command:       /home/shreyas/.nvm/versions/node/v23.6.0/bin/node /home/shreyas/.nvm/versions/node/v23.6.0/bin/firebase init
+[debug] [2025-07-27T05:04:11.655Z] CLI Version:   14.11.1
+[debug] [2025-07-27T05:04:11.655Z] Platform:      linux
+[debug] [2025-07-27T05:04:11.656Z] Node Version:  v23.6.0
+[debug] [2025-07-27T05:04:11.656Z] Time:          Sun Jul 27 2025 05:04:11 GMT+0000 (Coordinated Universal Time)
+[debug] [2025-07-27T05:04:11.657Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-07-27T05:04:11.668Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-07-27T05:04:11.669Z] > authorizing via signed-in user (shreyasp0924@gmail.com)
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  /home/shreyas/google-ai/metro-main/MetroPulse
+

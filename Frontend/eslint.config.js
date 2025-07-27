@@ -16,6 +16,9 @@ export default tseslint.config([
       
       //reactRefresh.configs.vite,
     ],
+    rules:{
+      '@typescript-eslint/no-unused-vars': 'off'
+    },
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,

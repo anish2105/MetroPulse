@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useLocationStore } from "@/store/location-store";
 import { useMapModeStore } from "@/store/map-mode-store";
-import { Bell, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { Switch } from "./ui/switch";
 import { useRouter } from "@tanstack/react-router";
 import { ReportEventDialog } from "./events/report-event";
 
 const Header = () => {
-  const { locality, loading } = useLocationStore();
+  const { locality } = useLocationStore();
   const { isMapMode, toggleMapMode } = useMapModeStore();
   const router = useRouter();
   const isFeedRoute = router.state.location.pathname === "/feed";

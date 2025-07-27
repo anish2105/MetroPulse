@@ -224,7 +224,7 @@ export default function ReportsPage() {
   const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState("all");
+  const [selectedStatus] = useState("all");
   const [selectedPriority, setSelectedPriority] = useState("all");
 
   useEffect(() => {

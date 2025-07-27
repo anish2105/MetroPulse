@@ -16,7 +16,7 @@ export function ProfilePage() {
   const { user, loading } = useAuth();
   const [showMbtiEditModal, setShowMbtiEditModal] = useState(false);
   const [mbtiEnabled, setMbtiEnabled] = useState(false);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [, setNotificationsEnabled] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
   const [newCategory, setNewCategory] = useState("");
   const [radius, setRadius] = useState<number>(2);

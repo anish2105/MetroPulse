@@ -240,7 +240,7 @@ export function ReportEventDialog() {
 
                 {selectedFiles.videos.length > 0 && (
                   <div className="flex flex-wrap gap-2">
-                    {selectedFiles.videos.map((file, index) => (
+                    {selectedFiles.videos.map((_file, index) => (
                       <div key={index} className="relative group">
                         <div className="w-20 h-20 bg-gray-100 rounded flex items-center justify-center">
                           <span className="text-xs">Video</span>
