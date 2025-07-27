@@ -3,7 +3,7 @@ import json
 import logging
 from datetime import datetime
 from pydantic import ValidationError
-from .schemas import CityData # Import our master Pydantic schema
+from .schemas import LocationData # Import our master Pydantic schema
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ class DataHandlerTool:
 
     def validate_and_save(
         self,
-        city: str,
+        location: str,
         movies_info_str: str,
         restaurant_info_str: str,
         concert_info_str: str
@@ -37,7 +37,7 @@ class DataHandlerTool:
 
             # 2. Combine them into the structure our Pydantic model expects
             combined_data = {
-                "city": city,
+                "location": location,
                 "movies": movies_data.get("movies", []),
                 "restaurants": {
                     "veg_restaurants": restaurant_data.get("veg_restaurants", []),
@@ -47,7 +47,7 @@ class DataHandlerTool:
             }
 
             # 3. Validate the data using Pydantic
-            validated_data = CityData.model_validate(combined_data)
+            validated_data = LocationData.model_validate(combined_data)
             logger.info("Pydantic validation successful.")
 
             # 4. Serialize the *validated* data back to a clean JSON string
@@ -69,7 +69,7 @@ class DataHandlerTool:
         # 5. Save the final, validated JSON string to GCS
         try:
             timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-            filename = f"city_data/{city.lower().replace(' ', '_')}_{timestamp}.json"
+            filename = f"location_data/{location.lower().replace(' ', '_')}_{timestamp}.json"
             content_bytes = final_json_string.encode('utf-8')
 
             # Using the correct .save() method as per the documentation
@@ -77,7 +77,7 @@ class DataHandlerTool:
                 name=filename,
                 content=content_bytes
             )
-            success_message = f"Successfully validated and saved city information for {city} to {saved_artifact.uri}"
+            success_message = f"Successfully validated and saved location information for {location} to {saved_artifact.uri}"
             logger.info(success_message)
             return success_message
         except Exception as e:

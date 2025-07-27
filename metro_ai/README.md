@@ -1,6 +1,6 @@
-# MetroPulse AI: Real-Time City Information Agent
+# MetroPulse AI: Real-Time Location Information Agent
 
-MetroPulse AI is a sophisticated, cloud-native agentic workflow built with the Google Agent Development Kit (ADK). Given a city name, it concurrently fetches real-time information on movie showtimes, restaurants, and concerts, validates the data, and archives it in Google Cloud Storage.
+MetroPulse AI is a sophisticated, cloud-native agentic workflow built with the Google Agent Development Kit (ADK). Given a location name, it concurrently fetches real-time information on movie showtimes, restaurants, and concerts, validates the data, and archives it in Google Cloud Storage.
 
 This project serves as a powerful demonstration of building resilient, production-ready AI systems that can handle the inconsistencies of real-world data.
 
@@ -25,8 +25,8 @@ sequenceDiagram
     participant Corrector (LLM Agent)
     participant GCS
 
-    User->>+Cloud Run (FastAPI): POST /get-city-info (city: "Bengaluru")
-    Cloud Run (FastAPI)->>+Parallel Agents: Run(city)
+    User->>+Cloud Run (FastAPI): POST /get-location-info (location: "Bengaluru")
+    Cloud Run (FastAPI)->>+Parallel Agents: Run(location)
     Parallel Agents-->>-Cloud Run (FastAPI): Return raw JSON strings (movies, restaurants, concerts)
     Cloud Run (FastAPI)->>+FinalProcessor (Python Agent): Execute with raw data
     loop Max 3 Attempts
@@ -151,16 +151,16 @@ You can interact with the deployed API using any HTTP client.
 Replace `<your-service-url>` with the URL provided after deployment.
 
 ```bash
-curl -X POST "<your-service-url>/get-city-info" \
+curl -X POST "<your-service-url>/get-location-info" \
 -H "Content-Type: application/json" \
--d '{"city": "Bengaluru"}'
+-d '{"location": "Bengaluru"}'
 ```
 
 ### Sample Success Response
 
 ```json
 {
-  "response": "Success! Data for Bengaluru was saved to GCS as 'city_data/bengaluru_20250727_013000.json' (Revision ID: 0)."
+  "response": "Success! Data for Bengaluru was saved to GCS as 'location_data/bengaluru_20250727_013000.json' (Revision ID: 0)."
 }
 ```
 

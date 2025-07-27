@@ -6,6 +6,7 @@ from typing import List, Dict, Optional
 class Movie(BaseModel):
     name: str = Field(description="The full name of the movie.")
     genre: str = Field(description="The genre(s) of the movie.")
+    compatible_mbti: List[str] = Field(description="A list of 2-4 Myers-Briggs Type Indicator (MBTI) personality types that would likely enjoy this movie, based on its genre and themes.")
     language: str = Field(description="The primary language of the movie.")
     certificate: str = Field(description="The certification rating.")
     description: str = Field(description="A brief description of the movie.")
@@ -24,9 +25,9 @@ class Concert(BaseModel):
     description: str = Field(description="A brief description of the event.")
 
 # --- Master Schema for Final Validation ---
-class CityData(BaseModel):
-    """The master data model for all city information."""
-    city: str = Field(description="The city for which the information was fetched.")
+class LocationData(BaseModel):
+    """The master data model for all location information."""
+    location: str = Field(description="The location for which the information was fetched.")
     movies: List[Movie]
     restaurants: Dict[str, List[Restaurant]] = Field(description="Contains keys 'veg_restaurants' and 'nonveg_restaurants'.")
     concerts: List[Concert]

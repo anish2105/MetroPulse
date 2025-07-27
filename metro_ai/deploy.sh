@@ -60,4 +60,4 @@ SERVICE_URL=$(gcloud run services describe $SERVICE_NAME --platform managed --re
 echo "Your API is available at: $SERVICE_URL"
 echo "------------------------------------------------------"
 echo "You can test it with the following command:"
-echo "curl -X POST \"$SERVICE_URL/get-city-info\" -H \"Content-Type: application/json\" -d '{\"city\": \"Bengaluru\"}'"
+echo "curl -X POST \"$SERVICE_URL/get-location-info\" -H \"Content-Type: application/json\" -d '{\"location\": \"Bengaluru\"}'"

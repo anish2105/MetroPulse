@@ -12,7 +12,7 @@ def create_metro_pulse_agent(artifact_service):
     """
     # STEP 1: Gather data concurrently.
     parallel_data_gatherer = ParallelAgent(
-        name="ParallelCityDataGatherer",
+        name="ParallelLocationDataGatherer",
         sub_agents=[movie_agent, restaurant_agent, concert_agent],
     )
 
@@ -30,7 +30,7 @@ def create_metro_pulse_agent(artifact_service):
             parallel_data_gatherer,
             final_processor
         ],
-        description="Gathers city data, then validates and saves it using a custom Python agent with an LLM repair loop."
+        description="Gathers location data, then validates and saves it using a custom Python agent with an LLM repair loop."
     )
 
     return root_agent
