@@ -1,0 +1,23 @@
+# media_file = None
+
+# event_name =  "WATER_LOGGING"
+# event_description = "Rainwater accumulated on roads, hard to drive. Locals wading through knee-deep water."
+# event_location = "Koramangala 5th Block"
+
+# event_name= "ATTRACTION"
+# event_description= "Live concert ongoing with huge crowd. Food stalls and music lighten the vibe."
+# event_location= "Cubbon Park"
+
+
+# event_name= "POWER_OUTAGE"
+# event_description=" Power has been out since afternoon. No update from BESCOM yet."
+# event_location= "Whitefield"
+
+
+# event_name= "POWER_OUTAGE"
+# event_description="Complete blackout since 2 PM. Street lights and homes without power."
+# event_location=  "Whitefield"
+
+# event_name = "WATER_LOGGING",
+# event_description= "Heavy waterlogging due to last night's rain. Roads are flooded and slow-moving.",
+# event_location = "Koramangala 5th Block"

@@ -1,0 +1,13 @@
+google-adk
+langchain
+google-generativeai
+langgraph
+python-dotenv
+google-genai
+litellm
+fastapi
+langchain-community
+langchain-google-genai
+uvicorn[standard]
+gunicorn
+google-cloud-firestore
