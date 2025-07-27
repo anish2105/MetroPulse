@@ -15,8 +15,7 @@ import { Plus, Upload } from "lucide-react";
 import { useLocationStore } from "@/store/location-store";
 import { toast } from "sonner";
 import { uploadFilesToStorage } from "@/lib/upload";
-import { collection, addDoc, doc, setDoc } from "firebase/firestore";
-import type { Event } from "@/types/Event";
+import { collection,  doc, setDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { useAuth } from "@/context/AuthContext";
 

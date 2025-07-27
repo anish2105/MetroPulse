@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -51,22 +52,22 @@ export function ProfilePage() {
     }
   };
 
-  const handleNotificationsEnabled = async () => {
-    try {
-      const newEnabledState = !notificationsEnabled;
-      setNotificationsEnabled(newEnabledState);
+  // const handleNotificationsEnabled = async () => {
+  //   try {
+  //     const newEnabledState = !notificationsEnabled;
+  //     setNotificationsEnabled(newEnabledState);
 
-      if (user) {
-        const userRef = doc(db, "users", user.uid);
-        await updateDoc(userRef, {
-          notificationsEnabled: newEnabledState,
-        });
-      }
-    } catch (error) {
-      console.error("Error updating notifications preference:", error);
-      setNotificationsEnabled(notificationsEnabled);
-    }
-  };
+  //     if (user) {
+  //       const userRef = doc(db, "users", user.uid);
+  //       await updateDoc(userRef, {
+  //         notificationsEnabled: newEnabledState,
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.error("Error updating notifications preference:", error);
+  //     setNotificationsEnabled(notificationsEnabled);
+  //   }
+  // };
 
   const handleAddCategory = async (
     event: React.KeyboardEvent<HTMLInputElement>
@@ -195,7 +196,7 @@ export function ProfilePage() {
         <ModeToggle />
       </div>
 
-      <Separator />
+      {/* <Separator />
       <div className="flex items-center justify-between">
         <p className="text-xl font-semibold">Notifications</p>
         <Switch
@@ -203,7 +204,7 @@ export function ProfilePage() {
           onCheckedChange={handleNotificationsEnabled}
           aria-label="Enable Notifications"
         />
-      </div>
+      </div> */}
       <Separator />
 
       {/* Categories Section */}
