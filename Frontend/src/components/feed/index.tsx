@@ -166,9 +166,10 @@ const EventsSection = ({
         Loading...
       </div>
     );
-  }else if(allEvents.length == 0 && !loading){
+  }else if(allEvents.length == 0){
      <div className="text-gray-400 text-center py-8">
-        No {title.toLowerCase()} available at the moment
+        {/* No {title.toLowerCase()} available at the moment */}
+        Loading...
       </div>
   }
 
