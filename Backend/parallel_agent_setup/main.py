@@ -26,7 +26,7 @@ app.add_middleware(
 
 class MediaFileDetail(BaseModel):
     mimeType: str
-    bytes: List[int]
+    bytes: List[int] = []
 
 class EventRequest(BaseModel):
     event_name: str
@@ -40,6 +40,7 @@ class EventSumary(BaseModel):
     Eventtype : str
     Eventname : str 
     EventSummary : str
+    compatible_mbti : List[str]
 
 # Health check
 @app.get("/")
@@ -58,7 +59,7 @@ async def root():
 #     })
 
 # Event summary endpoint
-@app.post("/event_summary/")
+@app.post("/event_summary")
 async def summarize_event(event: EventRequest):
     try:
         # Prepare prompts

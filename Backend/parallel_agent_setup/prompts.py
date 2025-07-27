@@ -189,7 +189,8 @@ def merge_summary(event_summary, media_summary):
          "Location": "Specific location of the event with landmarks if available",
          "Eventtype": "One of the approved classification categories]",
          "Eventname": "Concise, descriptive name for the event (max 10 words)",
-         "EventSummary": "Format the response as a structured summary, adhering all the sections in multiple paragraphs, dont make bullet points and headers, just give simple text paragraghs"
+         "EventSummary": "Format the response as a structured summary, adhering all the sections in multiple paragraphs, dont make bullet points and headers, just give simple text paragraghs",
+         "compatible_mbti" : "If the EventType is Public Gathering or Attraction then infer the compatible mbti personalilities. This will be a list of string containing multiple MBTI personality related to the 2 EventType. Any other event type will be a NULL personality"
       </Output Strcuture>
 
       <Quality Standards>
@@ -230,7 +231,10 @@ def merge_summary(event_summary, media_summary):
          "Location": "Specific location of the event with landmarks if available",
          "Eventtype": "One of the approved classification categories]",
          "Eventname": "Concise, descriptive name for the event (max 10 words)",
-         "EventSummary": "Format the response as a structured summary, adhering all the sections in multiple paragraphs, dont make bullet points and headers, just give simple text paragraghs"
+         "EventSummary": "Format the response as a structured summary, adhering all the sections in multiple paragraphs, dont make bullet points and headers, just give simple text paragraghs",
+         "compatible_mbti" : "If the EventType is Public Gathering or Attraction then infer the compatible mbti personalilities. This will be a list of string containing multiple MBTI personality related to the 2 EventType. Any other event type will be a NULL personality"
       </Output Strcuture>
    """
    return system_prompt, user_prompt 
+
+

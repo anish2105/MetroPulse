@@ -1,6 +1,7 @@
 import requests
 
-url = "http://localhost:8000/event_summary/"
+url = "https://multimodal-event-summarizer-755524969071.us-east1.run.app/event_summary"
+# url = "http://127.0.0.1:8000/event_summary"
 
 payload = {
     "event_name": "Standup Comedy Night",
