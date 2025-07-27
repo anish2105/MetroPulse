@@ -3,14 +3,16 @@ import os
 import asyncio
 import logging
 from contextlib import asynccontextmanager
+import json
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+# --- ADD THIS IMPORT ---
+from fastapi.middleware.cors import CORSMiddleware
+# -----------------------
 
 from dotenv import load_dotenv
-import json
 
-# No special google_adk or genai imports needed for configuration anymore
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.adk.artifacts import GcsArtifactService
@@ -28,6 +30,8 @@ logger = logging.getLogger(__name__)
 
 class LocationInfoRequest(BaseModel):
     location: str
+    # You had this in the previous version, it's good practice to keep it
+    location_type: str = "city" 
 
 app_state = {}
 
@@ -67,11 +71,24 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+# --- ADD THIS MIDDLEWARE CONFIGURATION ---
+# This must be done after the `app = FastAPI()` line.
+# It allows web pages from any origin to call your API.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allows all headers
+)
+# ----------------------------------------
+
 
 @app.post("/get-location-info",  response_model=LocationData)
 async def get_location_info(request: LocationInfoRequest):
     location_name = request.location
-    logger.info(f"Received request for  {location_name}")
+    location_type = request.location_type # Capture this from the request
+    logger.info(f"Received request for {location_type}: {location_name}")
 
     runner = app_state.get("runner")
     session_service = app_state.get("session_service")
@@ -82,9 +99,10 @@ async def get_location_info(request: LocationInfoRequest):
     session_id = f"api_session_{location_name.lower().replace(' ', '_')}_{os.urandom(8).hex()}"
 
     try:
+        # Pass both location and type to the agent's state
         session = await session_service.create_session(
             app_name="MetroPulseApp", user_id=user_id, session_id=session_id, 
-            state={"location": location_name}
+            state={"location": location_name, "location_type": location_type}
         )
         
         content = types.Content(role="user", parts=[types.Part(text=f"Get info for {location_name}")])
@@ -96,16 +114,12 @@ async def get_location_info(request: LocationInfoRequest):
             if event.is_final_response() and event.content and event.content.parts:
                 final_message_str = event.content.parts[0].text
         
-        # Parse the final message from the agent
         response_data = json.loads(final_message_str)
 
-        # Check if the agent returned a structured error
         if isinstance(response_data, dict) and response_data.get("status") == "error":
             logger.error(f"Agent pipeline failed for {location_name}: {response_data.get('message')}")
             raise HTTPException(status_code=500, detail=response_data.get("message"))
 
-        # If no error, the response_data is the full LocationData object.
-        # FastAPI will automatically validate it against the response_model.
         logger.info(f"Successfully processed request for {location_name}.")
         return response_data
 
