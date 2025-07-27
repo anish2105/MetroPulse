@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { getUserReports } from "@/lib/realtimeData";
@@ -26,14 +27,14 @@ const ReportCard = ({ report }: { report: any }) => {
     }
   };
 
-  const getPriorityBadge = (priority?: string) => {
-    const colors = {
-      high: 'bg-red-100 text-red-800 border-red-200',
-      medium: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      low: 'bg-green-100 text-green-800 border-green-200'
-    };
-    return colors[priority?.toLowerCase() as keyof typeof colors] || colors.medium;
-  };
+//   const getPriorityBadge = (priority?: string) => {
+//     const colors = {
+//       high: 'bg-red-100 text-red-800 border-red-200',
+//       medium: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+//       low: 'bg-green-100 text-green-800 border-green-200'
+//     };
+//     return colors[priority?.toLowerCase() as keyof typeof colors] || colors.medium;
+//   };
 
   if (!report?.title && !report?.Eventname) return null;
 
@@ -63,7 +64,7 @@ const ReportCard = ({ report }: { report: any }) => {
             </div>
           </div>
         </div>
-        <div className="flex flex-col items-end space-y-2">
+        {/* <div className="flex flex-col items-end space-y-2">
           <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getPriorityBadge(priority)}`}>
             {priority.toUpperCase()}
           </span>
@@ -74,7 +75,7 @@ const ReportCard = ({ report }: { report: any }) => {
           }`}>
             {status.toUpperCase()}
           </span>
-        </div>
+        </div> */}
       </div>
 
       {/* Description */}
@@ -133,7 +134,7 @@ const ReportDialog = ({
         </DialogHeader>
         <div className="space-y-6">
           {/* Status and Priority */}
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+          {/* <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
             <div className="flex items-center space-x-4">
               <div>
                 <p className="text-sm font-medium text-gray-700">Status</p>
@@ -161,11 +162,11 @@ const ReportDialog = ({
               <p className="text-sm text-gray-600">{report.reportedBy}</p>
               <p className="text-xs text-gray-500">{report.reportDate}</p>
             </div>
-          </div>
+          </div> */}
           
           {/* Description */}
           <div>
-            <h4 className="text-sm font-medium text-gray-900 mb-2">Description</h4>
+            <h4 className="text-sm font-medium mb-2">Description</h4>
             <div className="bg-gray-50 rounded-lg p-4">
               <p className="text-sm leading-relaxed text-gray-700">{report.description}</p>
             </div>
@@ -309,7 +310,7 @@ export default function ReportsPage() {
               <div className="text-2xl font-bold text-white">{stats.total}</div>
               <div className="text-green-200 text-sm">Total Reports</div>
             </div>
-            <div className="bg-white/20 backdrop-blur-md rounded-xl p-4 text-center">
+            {/* <div className="bg-white/20 backdrop-blur-md rounded-xl p-4 text-center">
               <div className="text-2xl font-bold text-yellow-400">{stats.pending}</div>
               <div className="text-green-200 text-sm">Pending</div>
             </div>
@@ -320,7 +321,7 @@ export default function ReportsPage() {
             <div className="bg-white/20 backdrop-blur-md rounded-xl p-4 text-center">
               <div className="text-2xl font-bold text-red-400">{stats.urgent}</div>
               <div className="text-green-200 text-sm">Urgent</div>
-            </div>
+            </div> */}
           </div>
 
           {/* Search and Filters */}
@@ -338,7 +339,7 @@ export default function ReportsPage() {
             </div>
 
             {/* Status Filter */}
-            <div className="flex gap-2 flex-wrap">
+            {/* <div className="flex gap-2 flex-wrap">
               {statusOptions.map((status) => (
                 <button
                   key={status.value}
@@ -352,7 +353,7 @@ export default function ReportsPage() {
                   {status.icon} {status.label}
                 </button>
               ))}
-            </div>
+            </div> */}
 
             {/* Priority Filter */}
             <select
