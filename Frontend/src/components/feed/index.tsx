@@ -5,14 +5,17 @@ import { useLocationStore } from "@/store/location-store";
 
 export default function MetroPulse() {
   const [activeTab] = useState("feed");
-  const { fetchLocation, city } = useLocationStore();
+  const { fetchLocation, city, locality } = useLocationStore();
 
   useEffect(() => {
     const getLocation = async () => {
       await fetchLocation();
     };
-
+    // const getCityEvents() = async () => {
+    //   await fetchCityEvents(locality);
+    // }
     getLocation();
+    // getCityEvents();
   }, [fetchLocation]);
   const events = [
     {

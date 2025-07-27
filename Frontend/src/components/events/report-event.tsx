@@ -15,7 +15,7 @@ import { Plus, Upload } from "lucide-react";
 import { useLocationStore } from "@/store/location-store";
 import { toast } from "sonner";
 import { uploadFilesToStorage } from "@/lib/upload";
-import { collection, addDoc, } from "firebase/firestore";
+import { collection, addDoc, doc, setDoc } from "firebase/firestore";
 import type { Event } from "@/types/Event";
 import { db } from "@/firebase/config";
 import { useAuth } from "@/context/AuthContext";
@@ -39,7 +39,7 @@ export function ReportEventDialog() {
     videos: [],
   });
   const { locality } = useLocationStore();
-  const {user} = useAuth(); 
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   console.log("selected files", selectedFiles);
@@ -70,32 +70,23 @@ export function ReportEventDialog() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to create event in API");
+        toast.error("Failed to prepare event. Please try again.");
       }
 
-     
+      const result = await response.json();
+      const summary = result.data;
+      console.log('Summary', summary)
+      const docRef = doc(collection(db, "event_summary")); // generates random ID
+      await setDoc(docRef, {
+        Location: summary.Location,
+        Eventtype: summary.Eventtype,
+        Eventname: summary.Eventname,
+        EventSummary: summary.EventSummary,
+        CreatedBy: user?.uid ?? "anonymous",
+        CreatedAt: new Date().toISOString(),
+      });
 
-      // 3. Store in Firestore
-      const firestoreEventData: Event = {
-        title: apiEventData.event_name,
-        description: apiEventData.event_description,
-        category: "general",
-        location: {
-          area: apiEventData.event_location,
-        },
-        creator: user ? {
-          uid: user.uid,
-          name: user.name,
-          avatar: user.avatar
-        } : null,
-        source: user ? "user" : "ai",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      await addDoc(collection(db, "events"), firestoreEventData);
-
-      toast.success("Event reported successfully!");
+      toast.success("Event summary uploaded successfully.");
       setIsOpen(false);
       setSelectedFiles({ images: [], videos: [] });
     } catch (error) {

@@ -1,11 +1,11 @@
-
-
 from typing import List
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import json
+from google.cloud import firestore
+from datetime import datetime
 
 from media_summary_agent import analyze_media_files
 from overall_summary import get_overall_summary
@@ -46,6 +46,17 @@ class EventSumary(BaseModel):
 async def root():
     return {"status": "OK", "message": "FastAPI event summarizer is running."}
 
+# async def upload_summary_to_firestore(summary: EventSumary):
+#     db = firestore.Client()
+#     doc_ref = db.collection("event_summary").document()  # auto ID
+#     doc_ref.set({
+#         "Location": summary.Location,
+#         "Eventtype": summary.Eventtype,
+#         "Eventname": summary.Eventname,
+#         "EventSummary": summary.EventSummary,
+#         # "created_at": datetime.utcnow().isoformat()
+#     })
+
 # Event summary endpoint
 @app.post("/event_summary/")
 async def summarize_event(event: EventRequest):
@@ -78,7 +89,11 @@ async def summarize_event(event: EventRequest):
         # Try to parse as JSON
         try:
             summary_json = EventSumary(**merger_summary_result)
-            return summary_json
+            return JSONResponse(
+            status_code=200,
+            content={"message": "Summary prepared", "data": summary_json.dict()}
+            )
+
         except json.JSONDecodeError:
             # Retry once
             retry_output = await get_overall_summary(merger_user_prompt, merger_system_prompt)
