@@ -174,10 +174,10 @@ const ReportDialog = ({
 
           {/* Location */}
           <div className="flex items-start space-x-2">
-            <MapPin className="w-5 h-5 text-gray-400 mt-0.5" />
+            <MapPin className="w-5 h-5  mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-gray-900">Location</p>
-              <p className="text-sm text-gray-600">{report.location}</p>
+              <p className="text-sm font-medium">Location</p>
+              <p className="text-sm text-gray-100">{report.location}</p>
             </div>
           </div>
 
@@ -198,13 +198,13 @@ const ReportDialog = ({
           {/* Additional Details */}
           {report.category && (
             <div>
-              <p className="text-sm font-medium text-gray-900">Category</p>
-              <p className="text-sm text-gray-600">{report.category}</p>
+              <p className="text-sm font-medium">Category</p>
+              <p className="text-sm text-gray-800">{report.category}</p>
             </div>
           )}
 
           {/* Actions */}
-          <div className="border-t pt-4">
+          {/* <div className="border-t pt-4">
             <div className="flex space-x-3">
               <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm">
                 Follow Up
@@ -213,7 +213,7 @@ const ReportDialog = ({
                 Share Report
               </button>
             </div>
-          </div>
+          </div> */}
         </div>
       </DialogContent>
     </Dialog>

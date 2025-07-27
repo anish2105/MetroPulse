@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { useLocationStore } from "@/store/location-store";
@@ -108,42 +109,67 @@ const EventCard = ({ event }: { event: any }) => {
 const transformMovieForEventCard = (movie: Movie) => ({
   title: movie.name,
   description: `${movie.genre} • ${movie.language} • ${movie.certificate}\n${movie.description}`,
-  location: Object.keys(movie.locations_available || {}).join(', ') || 'Various locations',
-  type: 'movie'
+  location:
+    Object.keys(movie.locations_available || {}).join(", ") ||
+    "Various locations",
+  type: "movie",
 });
 
-const transformRestaurantForEventCard = (restaurant: Restaurant, type: 'veg' | 'nonveg') => ({
+const transformRestaurantForEventCard = (
+  restaurant: Restaurant,
+  type: "veg" | "nonveg"
+) => ({
   title: restaurant.name,
-  description: `${restaurant.cuisine} • ${type.toUpperCase()} Restaurant${restaurant.rating ? ` • Rating: ${restaurant.rating}★` : ''}`,
+  description: `${restaurant.cuisine} • ${type.toUpperCase()} Restaurant${restaurant.rating ? ` • Rating: ${restaurant.rating}★` : ""}`,
   location: restaurant.address,
-  type: `${type}_restaurant`
+  type: `${type}_restaurant`,
 });
 
 const transformConcertForEventCard = (concert: Concert) => ({
   title: concert.name,
   description: concert.description,
   location: `${concert.venue} • ${concert.date}`,
-  type: 'concert'
+  type: "concert",
 });
 
 // Events Section Component - Using EventCard for all items (max 4)
-const EventsSection = ({ title, data, showMore = false }: { title: string; data: LocalityEvents; showMore?: boolean }) => {
+const EventsSection = ({
+  title,
+  data,
+  showMore = false,
+  loading,
+}: {
+  title: string;
+  data: LocalityEvents;
+  showMore?: boolean;
+  loading: boolean;
+}) => {
   const allEvents = [
-    ...(data.movies?.map(movie => transformMovieForEventCard(movie)) || []),
-    ...(data.concerts?.map(concert => transformConcertForEventCard(concert)) || []),
-    ...(data.restaurants?.veg_restaurants?.map(restaurant => transformRestaurantForEventCard(restaurant, 'veg')) || []),
-    ...(data.restaurants?.nonveg_restaurants?.map(restaurant => transformRestaurantForEventCard(restaurant, 'nonveg')) || [])
+    ...(data.movies?.map((movie) => transformMovieForEventCard(movie)) || []),
+    ...(data.concerts?.map((concert) =>
+      transformConcertForEventCard(concert)
+    ) || []),
+    ...(data.restaurants?.veg_restaurants?.map((restaurant) =>
+      transformRestaurantForEventCard(restaurant, "veg")
+    ) || []),
+    ...(data.restaurants?.nonveg_restaurants?.map((restaurant) =>
+      transformRestaurantForEventCard(restaurant, "nonveg")
+    ) || []),
   ];
 
   const displayEvents = showMore ? allEvents : allEvents.slice(0, 4);
   const hasMoreEvents = allEvents.length > 4;
 
-  if (allEvents.length === 0) {
+  if (allEvents.length === 0 && loading) {
     return (
       <div className="text-gray-400 text-center py-8">
-        No {title.toLowerCase()} available at the moment
+        Loading...
       </div>
     );
+  }else if(allEvents.length == 0 && !loading){
+     <div className="text-gray-400 text-center py-8">
+        No {title.toLowerCase()} available at the moment
+      </div>
   }
 
   return (
@@ -251,9 +277,7 @@ export default function MetroPulse() {
         setCityEvents(events);
         console.log("City Events:", events);
       } else {
-        console.warn(
-          "City is not defined, skipping city events fetch."
-        );
+        console.warn("City is not defined, skipping city events fetch.");
       }
     };
 
@@ -281,7 +305,11 @@ export default function MetroPulse() {
               <h2 className="text-lg font-semibold text-white mb-4">
                 City Events
               </h2>
-              <EventsSection title="City Events" data={cityEvents} />
+              <EventsSection
+                title="City Events"
+                data={cityEvents}
+                loading={loading}
+              />
             </div>
 
             {/* User Reports */}
@@ -318,7 +346,11 @@ export default function MetroPulse() {
               <h2 className="text-lg font-semibold text-white mb-4">
                 Locality Events
               </h2>
-              <EventsSection title="Locality Events" data={realtimeEvents} />
+              <EventsSection
+                title="Locality Events"
+                data={realtimeEvents}
+                loading={loading}
+              />
             </div>
           </div>
         </main>

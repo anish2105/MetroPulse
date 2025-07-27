@@ -131,15 +131,15 @@ const EventDialog = ({
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          <div className="bg-gray-50 rounded-lg p-4">
+          <div className="border border-gray-200 rounded-lg p-4">
             <p className="text-sm leading-relaxed">{event.description}</p>
           </div>
           
           <div className="flex items-start space-x-2">
-            <MapPin className="w-5 h-5 text-gray-400 mt-0.5" />
+            <MapPin className="w-5 h-5  mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-gray-900">Location</p>
-              <p className="text-sm text-gray-600">{event.location}</p>
+              <p className="text-sm font-medium ">Location</p>
+              <p className="text-sm ">{event.location}</p>
             </div>
           </div>
 
@@ -152,7 +152,7 @@ const EventDialog = ({
 
           {category === 'movie' && event.showtimes && (
             <div className="border-t pt-4">
-              <p className="text-sm font-medium text-gray-900 mb-2">Show Times</p>
+              <p className="text-sm font-medium mb-2">Show Times</p>
               <div className="grid grid-cols-2 gap-2">
                 {event.showtimes.map((time: string, idx: number) => (
                   <div key={idx} className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs text-center">
@@ -212,30 +212,26 @@ export default function EventsPage() {
   const [selectedLocation, setSelectedLocation] = useState("all");
 
   useEffect(() => {
-    const initialize = async () => {
-      setLoading(true);
-      await fetchLocation();
-      setLoading(false);
-    };
+  const initialize = async () => {
+    setLoading(true);
+    await fetchLocation();
 
-    const getRealTimeEvents = async () => {
-      if (locality) {
-        const events = await getLocalityEvents(locality);
-        setRealtimeEvents(events);
-      }
-    };
+    if (locality) {
+      const events = await getLocalityEvents(locality);
+      setRealtimeEvents(events);
+    }
 
-    const getCityEventsFn = async () => {
-      if (city) {
-        const events = await getCityEvents(city);
-        setCityEvents(events);
-      }
-    };
+    if (city) {
+      const events = await getCityEvents(city);
+      setCityEvents(events);
+    }
 
-    initialize();
-    getRealTimeEvents();
-    getCityEventsFn();
-  }, [fetchLocation, locality, city]);
+    setLoading(false); // ✅ only after everything is done
+  };
+
+  initialize();
+}, [fetchLocation, locality, city]);
+
 
   // Combine and filter events
   const allEvents = [
@@ -268,7 +264,7 @@ export default function EventsPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading events...</div>
+        <div className="text-xl">Loading events...</div>
       </div>
     );
   }
@@ -276,7 +272,7 @@ export default function EventsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Header */}
-      <div className="bg-white/10 backdrop-blur-md border-b border-white/20">
+      <div className="0 backdrop-blur-md border-b border-white/20">
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-white mb-4">
@@ -322,11 +318,11 @@ export default function EventsPage() {
             <select
               value={selectedLocation}
               onChange={(e) => setSelectedLocation(e.target.value)}
-              className="px-4 py-3 bg-white/20 backdrop-blur-md border border-white/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-400"
+              className="px-4 py-3  backdrop-blur-md border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400"
             >
-              <option value="all">All Locations</option>
-              <option value="city">City Events</option>
-              <option value="locality">Local Events</option>
+              <option value="all" className="text-black">All Locations</option>
+              <option value="city" className="text-black">City Events</option>
+              <option value="locality" className="text-black">Local Events</option>
             </select>
           </div>
         </div>
@@ -340,7 +336,7 @@ export default function EventsPage() {
               <h2 className="text-2xl font-semibold text-white">
                 {filteredEvents.length} Events Found
               </h2>
-              <div className="text-purple-200">
+              <div className="">
                 {selectedCategory !== 'all' && `Filtered by: ${categories.find(c => c.value === selectedCategory)?.label}`}
               </div>
             </div>

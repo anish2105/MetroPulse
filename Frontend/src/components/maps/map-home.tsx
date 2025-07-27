@@ -5,13 +5,10 @@ import {
   Marker,
   useJsApiLoader,
   InfoWindow,
-  // HeatmapLayer,
+  HeatmapLayer,
 } from "@react-google-maps/api";
 import type { Location } from "@/types/Location";
 
-// Extend Location type for the UserLocation in AppUser, which includes city
-
-// Define EventData and HeatmapPoint interfaces (must match MapHome)
 interface EventData {
   id: string;
   name: string;
@@ -32,16 +29,15 @@ interface HeatmapPoint {
 interface Props {
   location: Location;
   radius?: number;
-  events: EventData[]; // New prop for events
-  heatmapData: HeatmapPoint[]; // New prop for heatmap data
+  events: EventData[];
+  heatmapData: HeatmapPoint[];
 }
 
 const containerStyle = {
   width: "100%",
-  height: "91vh", // Use viewport height to ensure the map fills the space
+  height: "91vh",
 };
 
-// Define map styles to hide labels (from previous step)
 const mapStyles = [
   {
     elementType: "labels",
@@ -49,12 +45,11 @@ const mapStyles = [
   },
 ];
 
-// Function to calculate approximate bounds for a circle
 const calculateBounds = (
   center: { lat: number; lng: number },
-  radius: number // in meters
+  radius: number
 ) => {
-  const EARTH_RADIUS = 6378137; // meters
+  const EARTH_RADIUS = 6378137;
   const latRadian = (radius / EARTH_RADIUS) * (180 / Math.PI);
   const lngRadian =
     ((radius / EARTH_RADIUS) * (180 / Math.PI)) /
@@ -76,14 +71,14 @@ const MapHome: React.FC<Props> = ({
   location,
   radius,
   events,
-  // heatmapData,
+  heatmapData,
 }) => {
   const mapRef = useRef<google.maps.Map | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<EventData | null>(null);
 
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-    libraries: ["visualization"], // Required for HeatmapLayer
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY!,
+    libraries: ["visualization"],
   });
 
   const centerLatLng = location.latitude
@@ -93,22 +88,17 @@ const MapHome: React.FC<Props> = ({
   const onLoad = useCallback(
     (map: google.maps.Map) => {
       mapRef.current = map;
-      // If events are available, extend bounds to include them
+
       if (events && events.length > 0) {
         const bounds = new google.maps.LatLngBounds();
         bounds.extend(centerLatLng);
-        // events.forEach((event) => {
-        //   bounds.extend(
-        //     new google.maps.LatLng(event.latitude, event.longitude)
-        //   );
-        // });
+        events.forEach((event) => {
+          bounds.extend(
+            new google.maps.LatLng(event.latitude, event.longitude)
+          );
+        });
         map.fitBounds(bounds);
-      } else if (
-        radius &&
-        radius > 0 &&
-        location.latitude != null &&
-        location.longitude != null
-      ) {
+      } else if (radius && location.latitude && location.longitude) {
         const boundsData = calculateBounds(centerLatLng, radius);
         const bounds = new google.maps.LatLngBounds(
           boundsData.southWest,
@@ -121,24 +111,27 @@ const MapHome: React.FC<Props> = ({
     },
     [centerLatLng, events, location, radius]
   );
+
   const onUnmount = useCallback(() => {
     mapRef.current = null;
   }, []);
 
-  // Heatmap layer options (customize colors, radius, opacity)
-  // const heatmapOptions = {
-  //   radius: 20, // Affects the size of the blurred area
-  //   opacity: 0.6, // Overall opacity of the heatmap
-  //   // gradient: [
-  //   //   'rgba(0, 255, 255, 0)',
-  //   //   'rgba(0, 255, 255, 1)',
-  //   //   'rgba(0, 191, 255, 1)',
-  //   //   'rgba(0, 127, 255, 1)',
-  //   //   'rgba(0, 63, 255, 1)',
-  //   //   'rgba(0, 0, 191, 1)',
-  //   //   'rgba(0, 0, 127, 1)',
-  //   //   'rgba(0, 0, 63, 1)'
-  //   // ]
+  const heatmapOptions = {
+    radius: 20,
+    opacity: 0.6,
+    // gradient: [...] // Optional custom gradient
+  };
+
+  // const getMarkerIcon = (type: string) => {
+  //   switch (type) {
+  //     case "positive":
+  //       return "http://maps.google.com/mapfiles/ms/icons/green-dot.png";
+  //     case "negative":
+  //       return "http://maps.google.com/mapfiles/ms/icons/red-dot.png";
+  //     case "neutral":
+  //     default:
+  //       return "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png";
+  //   }
   // };
 
   if (!isLoaded) return <p>Loading map...</p>;
@@ -159,26 +152,50 @@ const MapHome: React.FC<Props> = ({
         keyboardShortcuts: false,
       }}
     >
-      {/* User's Location Marker */}
+      {/* User Location */}
       <Marker position={centerLatLng} />
+
+      {/* Radius Circle */}
+      {/* {radius && (
+        <Circle
+          center={centerLatLng}
+          radius={radius}
+          options={{
+            strokeColor: "#4285F4",
+            strokeOpacity: 0.5,
+            strokeWeight: 1,
+            fillColor: "#4285F4",
+            fillOpacity: 0.2,
+          }}
+        />
+      )} */}
 
       {/* Event Markers */}
       {events.map((event) => (
         <Marker
           key={event.id}
           position={{ lat: event.latitude, lng: event.longitude }}
-          onClick={() => setSelectedEvent(event)} // Set selected event on click
+          icon={{
+            url:
+              event.type === "positive"
+                ? "/green-marker.png"
+                : event.type === "negative"
+                  ? "/red-marker.png"
+                  : "/yellow-marker.png",
+            scaledSize: new window.google.maps.Size(30, 30),
+          }}
+          onClick={() => setSelectedEvent(event)}
         />
       ))}
 
-      {/* Info Window for Selected Event */}
+      {/* Info Window */}
       {selectedEvent && (
         <InfoWindow
           position={{
             lat: selectedEvent.latitude,
             lng: selectedEvent.longitude,
           }}
-          onCloseClick={() => setSelectedEvent(null)} // Close info window
+          onCloseClick={() => setSelectedEvent(null)}
         >
           <div style={{ padding: "10px" }}>
             <h3>{selectedEvent.name}</h3>
@@ -192,20 +209,26 @@ const MapHome: React.FC<Props> = ({
               <strong>Time:</strong> {selectedEvent.time}
             </p>
             <p>{selectedEvent.description}</p>
-            {/* Add more event details here */}
           </div>
         </InfoWindow>
       )}
 
       {/* Heatmap Layer */}
-      {/* {heatmapData.length > 0 && (
+      {heatmapData.length > 0 && (
         <HeatmapLayer
           options={heatmapOptions}
           data={heatmapData.map(
-            (point) => new google.maps.LatLng(point.latitude, point.longitude)
+            (point) =>
+              ({
+                location: new google.maps.LatLng(
+                  point.latitude,
+                  point.longitude
+                ),
+                weight: point.weight,
+              }) as google.maps.visualization.WeightedLocation
           )}
         />
-      )} */}
+      )}
     </GoogleMap>
   );
 };
