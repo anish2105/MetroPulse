@@ -1,22 +1,130 @@
-# MetroPulse AI: Real-Time Location Information Agent
+# MetroPulse: The Digital Pulse of Your City 🌆
 
-MetroPulse AI is a sophisticated, cloud-native agentic workflow built with the Google Agent Development Kit (ADK). Given a location name, it concurrently fetches real-time information on movie showtimes, restaurants, and concerts (for now), validates the data, and archives it in Google Cloud Storage.
+**Team 200NotOk** | **Managing City Data Overload**
 
-This project serves as a powerful demonstration of building resilient, production-ready AI systems that can handle the inconsistencies of real-world data and perform creative inference tasks.
+MetroPulse is not just a map or event aggregator—it's the digital pulse of your city, curated just for you. We transform the overwhelming noise of urban life into a serene, relevant, and joyful experience by filtering information through your unique personality and preferences.
 
-## Key Features
+## 🚀 The Problem We're Solving
 
--   **Adaptable Location-Based Search:** The API endpoint is generalized to handle any `location`, allowing for both high-level searches (e.g., "Bengaluru") and hyperlocal queries (e.g., "Koramangala, Bengaluru").
--   **Creative AI Inference:** The movie agent goes beyond data retrieval to infer and suggest a list of Myers-Briggs Type Indicator (MBTI) personality types that would likely enjoy a film, adding a layer of personalized insight.
--   **Concurrent Data Fetching:** Utilizes a `ParallelAgent` to gather information for all categories simultaneously, ensuring rapid response times.
--   **Robust Python-First Data Validation:** Leverages Pydantic schemas for strict, deterministic validation of data structures and types *before* storage, guaranteeing data integrity.
--   **Intelligent Self-Healing Capability:** Implements a fallback "Corrector Agent" within a retry loop. If the initial data from an agent fails validation, a powerful LLM is invoked specifically to fix the data based on the precise validation error, making the pipeline resilient to LLM inconsistencies.
--   **Cloud-Native & Serverless:** Packaged as a Docker container and deployed on Google Cloud Run, providing a scalable, secure, and cost-effective FastAPI endpoint with CORS enabled for web frontends.
--   **Pure Python Final Processing:** A custom `BaseAgent` handles all final validation, data cleaning, and storage logic in deterministic Python, using LLMs only when necessary for specialized tasks.
--   **User Submitted Reports:** A custom sequence agent which will handle user submitted reports and formulates a clean, insightful, well defined summary.
-## System Architecture
+We are drowning in a sea of digital noise:
 
-The application follows a sequential pipeline that orchestrates a parallel data-gathering step followed by a robust, custom processing step.
+- **Digital Overload**: Constant, irrelevant notifications from dozens of apps create anxiety and decision fatigue
+- **Fear Of Missing Out (FOMO)**: Endless scrolling on event apps leads to analysis paralysis and never making the "perfect" choice  
+- **Impersonal Recommendations**: Existing platforms maximize engagement and ad revenue, not personal well-being—they tell us what's popular, not what's right for us
+
+The result is a generation that is more connected, yet feels more disconnected from their own communities and themselves.
+
+## ✨ Our Solution
+
+MetroPulse couples two powerful, independently scalable systems:
+
+1. **Real-Time Infotainment Agent**: Fetches and structures planned events like movies, concerts, and restaurant openings for any location
+2. **Multimodal Event Summarizer**: Captures and understands the unstructured, real-time pulse of the city—from traffic jams and water logging to pop-up book clubs and community gatherings
+
+This data is filtered through our unique **Personality-Based Noise Filter** to create a serene, relevant, and joyful urban experience. We transform FOMO into **JOMO** (the Joy of Missing Out... on what doesn't matter to you).
+
+## 🛠️ Google Technologies Used
+
+- **Google Cloud Run** – Serverless, containerized microservices with auto-scaling
+- **Firebase** – User authentication and city data storage  
+- **VertexAI (Gemini Models)** – Creative inference, multimodal summarization, and intelligent data correction
+- **Google Agent Development Kit** – Orchestrating complex workflows with SequentialAgent and ParallelAgent
+- **Google Cloud Storage** – Archiving validated JSON data for analysis and improvements
+- **Firebase Studio** – Cloud-based IDE for development
+- **Google Maps** – Interactive city maps and location coordinates
+
+## 🎯 Key Features
+
+### What It Offers
+- **Live City Feed on Map**: Interactive map-based dashboard exploring real-time events, incidents, and alerts
+- **Multilingual Multimodal Event Reporting**: Users upload geotagged images, text, and videos—our AI analyzes and summarizes them
+- **Personalized Pulse Experience**: AI-powered local recommendations based on personality, location, and interactions
+
+### How It Works
+- **Hyperlocal & City-Wide Granularity**: Understanding context from neighborhoods to metropolitan areas
+- **Concurrent Agentic Data Pipelines**: Fast, efficient data gathering from multiple sources simultaneously  
+- **Robust Self-Healing Data Pipeline**: Python-first validation with specialist LLM agents for error correction
+- **Scalable Decoupled Microservices**: Independent development, deployment, and scaling of components
+
+## 🌟 Impact
+
+1. **Real-Time Public Awareness**: Unified, AI-driven city feed for traffic, civic issues, and local happenings
+2. **Empowers Hyperlocal Business Engagement**: Insights into personality distribution for specific geolocations
+3. **Reduces Information Overload**: AI-curated summaries and personality-based filtering for relevance
+
+## 🏗️ System Architecture
+
+```mermaid
+graph TB
+    subgraph "Frontend Application"
+        A[React Frontend<br/>localhost:5173]
+    end
+    
+    subgraph "Backend Services"
+        B[Multimodal Report Handler<br/>FastAPI - uvicorn main:app]
+        C[Real-Time Infotainment Agent<br/>Google Cloud Run]
+    end
+    
+    subgraph "Data Layer"
+        D[Firestore<br/>User Reports & Summaries]
+        E[Google Cloud Storage<br/>Validated Event Data]
+    end
+    
+    subgraph "AI Processing"
+        F[VertexAI Gemini Models<br/>Multimodal Analysis]
+        G[Personality-Based Filter<br/>MBTI Recommendations]
+        H[Sequential Agent<br/>Orchestration]
+        I[Parallel Agent<br/>Concurrent Data Gathering]
+    end
+    
+    A -->|User Reports<br/>Images/Text/Video| B
+    B -->|Multimodal Data| F
+    F -->|AI Summary| B
+    B -->|Store Summary| D
+    
+    A -->|Location Query| C
+    C --> H
+    H --> I
+    I -->|Movies/Restaurants/Concerts| C
+    C -->|Validated Data| E
+    C -->|Personalized Results| A
+    
+    style A fill:#e1f5fe
+    style B fill:#f3e5f5
+    style C fill:#f3e5f5
+    style D fill:#e8f5e8
+    style E fill:#e8f5e8
+    style F fill:#fff3e0
+    style G fill:#fff3e0
+```
+
+## 🚀 Quick Start Guide
+
+### 1. Frontend Setup
+```bash
+cd Frontend
+npm install
+npm run dev
+# View on http://localhost:5173
+```
+
+### 2. Backend Setup (Multimodal Report Handler)
+```bash
+cd Backend/parallel_agent_setup
+uvicorn main:app --reload
+# Handles user-submitted reports and provides insightful summaries
+# Data flows: Frontend → Backend → Firestore
+```
+
+### 3. Agent Setup (Real-Time Infotainment)
+```bash
+cd metro_ai
+# Follow the detailed setup below
+```
+
+## 🏗️ Detailed Agent Architecture
+
+The real-time infotainment system follows a sequential pipeline orchestrating parallel data-gathering with robust processing:
 
 ```mermaid
 sequenceDiagram
@@ -45,121 +153,114 @@ sequenceDiagram
     CloudRun-->>-Client: response Success Data saved to gs
 ```
 
-## Project Structure
+## 📁 Project Structure
 
 ```
-metro_ai/
-├── agents/
-│   ├── common_tools/
-│   │   ├── __init__.py
-│   │   ├── schemas.py          # Central Pydantic models for data validation.
-│   │   └── data_handler.py     #  custom tool tos ave artifact in gcs.
-│   ├── concert_agent/
-│   │   └── agent.py            # Simple LLM agent to fetch concert data.
-│   ├── movie_agent/
-│   │   └── agent.py            # Simple LLM agent to fetch movie data.
-│   ├── restaurant_agent/
-│   │   └── agent.py            # Simple LLM agent to fetch restaurant data.
-│   ├── corrector_agent.py         # The specialist LLM agent for self-healing.
-│   ├── final_processor_agent.py # The custom Python agent for validation and storage.
-│   └── orchestrator_agent/
-│       └── agent.py            # Defines the master SequentialAgent pipeline.
-├── .env                        # Local environment variables (DO NOT COMMIT).
-├── .gcloudignore               # Files to ignore during gcloud deployment.
-├── .dockerignore               # Files to ignore during Docker build (IMPORTANT for security).
-├── Dockerfile                  # Instructions for building the container image.
-├── main.py                     # The FastAPI server application.
-├── requirements.txt            # Project dependencies.
-├── setup_gcp.sh                # One-time script to configure GCP project permissions.
-└── deploy.sh                   # Script to build and deploy the application to Cloud Run.
+MetroPulse/
+├── Frontend/                           # React application
+│   ├── src/
+│   ├── package.json
+│   └── ...
+├── Backend/
+│   └── parallel_agent_setup/          # Multimodal report handler
+│       ├── main.py                     # FastAPI server
+│       └── ...
+└── metro_ai/                          # Real-time infotainment agent
+    ├── agents/
+    │   ├── common_tools/
+    │   │   ├── schemas.py              # Pydantic validation models
+    │   │   └── data_handler.py         # GCS storage tool
+    │   ├── concert_agent/
+    │   ├── movie_agent/
+    │   ├── restaurant_agent/
+    │   ├── corrector_agent.py          # Self-healing LLM agent
+    │   ├── final_processor_agent.py    # Python validation & storage
+    │   └── orchestrator_agent/
+    ├── main.py                         # FastAPI server
+    ├── requirements.txt
+    ├── Dockerfile
+    ├── setup_gcp.sh                    # GCP configuration script
+    └── deploy.sh                       # Cloud Run deployment
 ```
 
-## Google Cloud Setup (One-Time)
+## ⚙️ Google Cloud Setup (One-Time)
 
-Before deploying, you need to configure your Google Cloud project.
+### Prerequisites
+1. **Enable APIs**:
+   - Cloud Run API
+   - Vertex AI API  
+   - Cloud Storage API
 
-1.  **Enable APIs:** Ensure the following APIs are enabled in your GCP project:
-    -   Cloud Run API
-    -   Vertex AI API
-    -   Cloud Storage API
+2. **Create GCS Bucket**: For storing validated event data
 
-2.  **Create a GCS Bucket:** Create a new Google Cloud Storage bucket to store the output artifacts.
+3. **Configure Environment**:
+```env
+# Create .env in metro_ai/
+GOOGLE_GENAI_USE_VERTEXAI=TRUE
+GOOGLE_CLOUD_LOCATION=us-central1
+GOOGLE_CLOUD_STAGING_BUCKET=gs://your-bucket-name-here
+GOOGLE_CLOUD_PROJECT=your-gcp-project-id-here
+```
 
-3.  **Configure `.env` file:** Create a `.env` file in the root of the project with your specific configuration:
-    ```env
-    # Vertex backend config
-    GOOGLE_GENAI_USE_VERTEXAI=TRUE
-    GOOGLE_CLOUD_LOCATION=us-central1
-    GOOGLE_CLOUD_STAGING_BUCKET=gs://your-bucket-name-here
-    GOOGLE_CLOUD_PROJECT=your-gcp-project-id-here
-
-    # Optional: If you have GOOGLE_APPLICATION_CREDENTIALS set for local dev, it will be used.
-    ```
-
-4.  **Run the Setup Script:** Make the script executable and run it once to grant the necessary IAM permissions to the Cloud Run service account.
-    ```bash
-    chmod +x setup_gcp.sh
-    ./setup_gcp.sh
-    ```
-
-## Local Development & Setup
-
-1.  **Clone the repository:**
-    ```bash
-    git clone <your-repo-url>
-    cd metro_ai
-    ```
-2.  **Create a Python virtual environment:**
-    ```bash
-    python -m venv .venv
-    source .venv/bin/activate
-    ```
-3.  **Install dependencies:**
-    ```bash
-    pip install -r requirements.txt
-    ```
-4.  **Authenticate gcloud (for local runs):**
-    ```bash
-    gcloud auth application-default login
-    ```
-5.  **Run the FastAPI server locally:**
-    ```bash
-    uvicorn main:app --reload
-    ```    The server will be available at `http://127.0.0.1:8000`.
-
-## Deployment to Google Cloud Run
-
-The entire deployment process is automated with a single script.
-
-1.  **Ensure your `.env` file is correct.** The script reads from this file to configure the deployment.
-2.  **Make the script executable:**
-    ```bash
-    chmod +x deploy.sh
-    ```
-3.  **Run the deployment:**
-    ```bash
-    ./deploy.sh
-    ```
-    The script will build the container image using Cloud Build and deploy it to a new service on Cloud Run. It will output the final service URL upon completion.
-
-## API Usage
-
-You can interact with the deployed API using any HTTP client.
-
-### Sample Request (`curl`)
-
-Replace `<your-service-url>` with the URL provided after deployment.
-
+4. **Run Setup Script**:
 ```bash
-curl -X POST "https://<your-service-url>.a.run.app/get-location-info" \
+cd metro_ai
+chmod +x setup_gcp.sh
+./setup_gcp.sh
+```
+
+## 🔧 Development Setup
+
+### Local Development
+```bash
+# 1. Clone repository
+git clone <your-repo-url>
+cd MetroPulse
+
+# 2. Setup Python environment for agents
+cd metro_ai
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+
+# 3. Authenticate with Google Cloud
+gcloud auth application-default login
+
+# 4. Run agent service locally
+uvicorn main:app --reload
+# Available at http://127.0.0.1:8000
+
+# 5. Setup backend service
+cd ../Backend/parallel_agent_setup
+# Follow similar setup process
+
+# 6. Setup frontend
+cd ../../Frontend
+npm install
+npm run dev
+# Available at http://localhost:5173
+```
+
+## 🚀 Deployment
+
+### Deploy to Google Cloud Run
+```bash
+cd metro_ai
+chmod +x deploy.sh
+./deploy.sh
+# Script handles container building and Cloud Run deployment
+```
+
+## 📡 API Usage
+
+### Real-Time City Information
+```bash
+curl -X POST "https://your-service-url.a.run.app/get-location-info" \
 -H "Content-Type: application/json" \
 -d '{"location": "Bengaluru"}'
-
-
 ```
 
-### Sample Success Response
-
+### Sample Response
 ```json
 {
   "location": "Bengaluru",
@@ -170,273 +271,63 @@ curl -X POST "https://<your-service-url>.a.run.app/get-location-info" \
       "compatible_mbti": ["ENTP", "INTP", "INTJ", "ESTP"],
       "language": "English",
       "certificate": "UA13+",
-      "description": "A new take on the classic Marvel superhero team, exploring their origins and first adventures.",
+      "description": "A new take on the classic Marvel superhero team...",
       "locations_available": {
         "Innovative Multiplex Marathahalli": ["10:45 AM"]
-      }
-    },
-    {
-      "name": "Jurassic World Rebirth",
-      "genre": "Action, Adventure, Sci-Fi",
-      "compatible_mbti": ["ESTP", "ISTP", "ENTP", "INTP"],
-      "language": "English",
-      "certificate": "Not specified",
-      "description": "Dinosaurs are back and more dangerous than ever in this new installment of the Jurassic World saga.",
-      "locations_available": {
-        "BookMyShow": ["Check Listings"]
-      }
-    },
-    {
-      "name": "Superman",
-      "genre": "Action, Adventure, Sci-Fi",
-      "compatible_mbti": ["INFJ", "ENFJ", "ISTJ", "ESTJ"],
-      "language": "English",
-      "certificate": "Not specified",
-      "description": "The classic hero returns to save the day in this action-packed adventure.",
-      "locations_available": {
-        "BookMyShow": ["Check Listings"]
-      }
-    },
-    {
-      "name": "Nilgiris: A Shared Wilderness",
-      "genre": "Documentary",
-      "compatible_mbti": ["INFP", "INFJ", "ISFP", "ISTP"],
-      "language": "English",
-      "certificate": "Not specified",
-      "description": "A look into the rich biodiversity and wildlife of the Nilgiri Biosphere Reserve.",
-      "locations_available": {
-        "BookMyShow": ["Check Listings"]
-      }
-    },
-    {
-      "name": "F1: The Movie",
-      "genre": "Action, Sports",
-      "compatible_mbti": ["ESTP", "ISTP", "ENTJ", "ESTJ"],
-      "language": "English",
-      "certificate": "Not specified",
-      "description": "Experience the thrill and adrenaline of Formula 1 racing.",
-      "locations_available": {
-        "BookMyShow": ["Check Listings"]
-      }
-    },
-    {
-      "name": "Saiyaara",
-      "genre": "Drama, Romance, Musical",
-      "compatible_mbti": ["INFP", "ISFP", "ENFP", "ESFP"],
-      "language": "Hindi",
-      "certificate": "UA16+",
-      "description": "A romantic musical drama exploring love and relationships.",
-      "locations_available": {
-        "Innovative Multiplex Marathahalli": ["01:00 PM"],
-        "Sandhya Theatre RGB Laser Atmos": ["Check Listings"]
-      }
-    },
-    {
-      "name": "Hari Hara Veera Mallu: Part 1 – Sword Vs Spirit",
-      "genre": "Action, Adventure, Thriller",
-      "compatible_mbti": ["ESTP", "ISTP", "ENTJ", "INTJ"],
-      "language": "Telugu, Hindi",
-      "certificate": "UA16+",
-      "description": "A historical action epic filled with thrilling adventures and sword fights.",
-      "locations_available": {
-        "Innovative Multiplex Marathahalli": ["10:30 AM"],
-        "Sandhya Theatre RGB Laser Atmos": ["Check Listings"]
-      }
-    },
-    {
-      "name": "Ekka",
-      "genre": "Action",
-      "compatible_mbti": ["ESTP", "ISTP", "ESTJ", "ISTJ"],
-      "language": "Kannada",
-      "certificate": "UA16+",
-      "description": "An action-packed Kannada film.",
-      "locations_available": {
-        "Innovative Multiplex Marathahalli": ["Check Listings"],
-        "Sandhya Theatre RGB Laser Atmos": ["Check Listings"]
-      }
-    },
-    {
-      "name": "Thalaivan Thalaivii",
-      "genre": "Drama",
-      "compatible_mbti": ["INFJ", "ENFJ", "ISFJ", "ESFJ"],
-      "language": "Tamil",
-      "certificate": "UA13+",
-      "description": "A Tamil drama exploring complex relationships.",
-      "locations_available": {
-        "Innovative Multiplex Marathahalli": ["Check Listings"],
-        "Sandhya Theatre RGB Laser Atmos": ["Check Listings"]
-      }
-    },
-    {
-      "name": "Su From So",
-      "genre": "Comedy",
-      "compatible_mbti": ["ESFP", "ISFP", "ENFP", "INFP"],
-      "language": "Kannada",
-      "certificate": "UA16+",
-      "description": "A Kannada comedy film.",
-      "locations_available": {
-        "Innovative Multiplex Marathahalli": ["12:40 PM"],
-        "Sandhya Theatre RGB Laser Atmos": ["Check Listings"]
       }
     }
   ],
   "restaurants": {
-    "veg_restaurants": [
-      {
-        "name": "Vidyarthi Bhavan",
-        "cuisine": "South Indian",
-        "rating": 4.5,
-        "address": "Basavanagudi, Bengaluru [9]"
-      },
-      {
-        "name": "Brahmins' Coffee Bar",
-        "cuisine": "South Indian",
-        "rating": 4.4,
-        "address": "Shankarpuram, Bengaluru [9, 11]"
-      },
-      {
-        "name": "Mavalli Tiffin Room (MTR)",
-        "cuisine": "South Indian",
-        "rating": 4.3,
-        "address": "Lalbagh, Bengaluru [10, 11]"
-      },
-      {
-        "name": "Green Theory",
-        "cuisine": "Global Vegetarian",
-        "rating": 4.0,
-        "address": "Richmond Road, Bengaluru [4]"
-      },
-      {
-        "name": "Little Italy",
-        "cuisine": "Italian",
-        "rating": 4.2,
-        "address": "Indiranagar, Bengaluru [4, 11]"
-      }
-    ],
-    "nonveg_restaurants": [
-      {
-        "name": "Meghana Foods",
-        "cuisine": "Andhra, Biryani, North Indian, Seafood",
-        "rating": 4.0,
-        "address": "Jayanagar, Bengaluru [3, 5]"
-      },
-      {
-        "name": "Empire Restaurant",
-        "cuisine": "North Indian, Biryani, Kebab, South Indian, Mughlai, Chinese, Seafood",
-        "rating": 3.8,
-        "address": "Majestic, Gandhi Nagar, Bengaluru [3, 5]"
-      },
-      {
-        "name": "Nagarjuna Restaurant",
-        "cuisine": "Andhra",
-        "rating": 4.1,
-        "address": "Residency Road, Bengaluru [2, 3, 8]"
-      },
-      {
-        "name": "AB's - Absolute Barbecues",
-        "cuisine": "Barbecue, North Indian, Kebab, Biryani",
-        "rating": 4.2,
-        "address": "BTM Layout, Bengaluru [5]"
-      },
-      {
-        "name": "Shivaji Military Hotel",
-        "cuisine": "Non-Vegetarian",
-        "rating": 4.0,
-        "address": "Jayanagar, Bengaluru [2, 8]"
-      }
-    ]
+    "veg_restaurants": [...],
+    "nonveg_restaurants": [...]
   },
-  "concerts": [
-    {
-      "name": "Rajesh Krishnan Live in Concert",
-      "date": "2025-07-26",
-      "venue": "Orion Mall, Rajajinagar",
-      "description": "A soulful celebration of Kannada music's golden voice, wrapped in nostalgia, rhythm, and timeless emotion. Expect an immersive live experience as Rajesh Krishnan brings his iconic hits to life from heart-melting ballads to festive chartbusters [3, 8]."
-    },
-    {
-      "name": "Indo Tech ft. Akhlad Ahmed",
-      "date": "2025-07-27",
-      "venue": "Kitty Ko the Lalit Ashok",
-      "description": "Details about the event are not available in the search results."
-    },
-    {
-      "name": "Shallou",
-      "date": "2025-08-03",
-      "venue": "GYLT",
-      "description": "Details about the event are not available in the search results [2, 6, 7]."
-    },
-    {
-      "name": "KUMAR SANU LIVE IN CONCERT",
-      "date": "2025-08-09",
-      "venue": "Pheonix Market City, Whitefield",
-      "description": "Details about the event are not available in the search results [3, 10]."
-    },
-    {
-      "name": "KS Chitra Live Bengaluru (Chithra 45)",
-      "date": "2025-08-16",
-      "venue": "J K Grand Arena",
-      "description": "A night of pure musical nostalgia as the legendary Dr. KS Chithra celebrates 45 glorious years in music [11]."
-    },
-    {
-      "name": "Wonderla with Strangers",
-      "date": "2025-08-23",
-      "venue": "Bengaluru",
-      "description": "Details about the event are not available in the search results [3]."
-    },
-    {
-      "name": "Hiphop Tamizha",
-      "date": "2025-08-23",
-      "venue": "NICE Grounds",
-      "description": "An explosive rap-folk fusion, performing biggest hits like Enjoy Enjaami, Theera Ulaa, and Vetri Kodi Kattu [11]."
-    },
-    {
-      "name": "Dandiya Night Festival 2025",
-      "date": "2025-09-28",
-      "venue": "Manpho Convention Centre",
-      "description": "Details about the event are not available in the search results [3]."
-    },
-    {
-      "name": "Passenger",
-      "date": "2025-11-22",
-      "venue": "Phoenix Market City",
-      "description": "Details about the event are not available in the search results [2, 6, 7]."
-    },
-    {
-      "name": "Jacob Collier",
-      "date": "2025-12-02",
-      "venue": "Gymkhana Grounds (Indian Institute of Science)",
-      "description": "Details about the event are not available in the search results [2, 6, 7]."
-    }
-  ]
-}
-
-```
-
-### Sample Failure Response (after retries)
-
-```json
-{
-  "response": "ERROR: Failed to validate data after 3 attempts. Final error: <Pydantic validation error details>"
+  "concerts": [...]
 }
 ```
 
----
+## 🔄 How MetroPulse is Different
 
-## Current Limitations
+| Traditional Recommenders | MetroPulse |
+|--------------------------|------------|
+| **Goal**: Maximize Clicks & Engagement | **Goal**: Maximize Personal Well-being & Relevance |
+| **Method**: Data-driven, popularity-based | **Method**: Personality-driven, context-aware |
+| **Analogy**: A Loud, Crowded Marketplace | **Analogy**: Higher Signal in the digital noise |
+| **Result**: Contributes to digital noise & FOMO | **Result**: Filters digital noise & fosters JOMO |
 
--   **Data Source Dependency:** The system currently relies exclusively on Google Search as its tool. The quality and structure of the data are subject to the format of search results, which can be inconsistent or incomplete.
--   **Semantic Hallucination:** While the self-healing mechanism corrects syntactic and structural errors in the data, it does not prevent the LLM from potential semantic errors or "hallucinations" (e.g., inventing a movie showtime).
--   **No Caching:** Every API call, even for the same location, triggers a full agent run. This is inefficient for popular locations and can increase costs and latency.
--   **Stateless Sessions:** The use of `InMemorySessionService` is perfect for the stateless nature of Cloud Run but would not support conversational memory or follow-up questions in a different architecture.
+## 🚧 Current Limitations
 
-## Future Scope
+- **Data Source Dependency**: Relies on Google Search results which can be inconsistent
+- **Semantic Hallucination**: Self-healing corrects structure but not semantic accuracy
+- **No Caching**: Every API call triggers full agent run
+- **Stateless Sessions**: Perfect for Cloud Run but no conversational memory
 
--   **Specialized Tools:** Develop dedicated Python tools for more reliable data gathering. This could include web scraping tools (using `BeautifulSoup` or `Playwright`) for specific ticket booking sites or direct integration with third-party APIs (e.g., weather APIs, event APIs).
--   **Enhanced Personalization:** Add a user context layer. The API could accept a user's MBTI type and re-rank or filter movie results based on compatibility.
--   **Implement a Caching Layer:** Integrate a caching solution like Redis or Google Cloud Memorystore to store results for popular locations for a short TTL (e.g., 1-2 hours). This would dramatically reduce latency and cost for frequent queries.
--   **Expand Agent Capabilities:** Add new agents to the parallel step to fetch more information, such as:
-    -   `WeatherAgent`
-    -   `LocalEventsAgent` (for festivals, workshops, etc.)
-    -   `TrafficAgent`
--   **Authentication and Rate Limiting:** For a true production API, implement an authentication layer (e.g., API Keys) and rate limiting to prevent abuse.
--   **Asynchronous Processing:** For very long-running queries, the architecture could be shifted to an asynchronous model where the client submits a job and polls a status endpoint for the result.
+## 🔮 Future Scope
+
+### Enhanced Data Sources
+- **Specialized Tools**: Web scraping tools for ticket booking sites
+- **Direct API Integration**: Weather APIs, official event APIs
+- **Real-time Traffic Integration**: Live traffic and transportation data
+
+### Advanced Personalization  
+- **Deep MBTI Integration**: User profiles with personality-based filtering
+- **Learning Preferences**: Adaptive recommendations based on user behavior
+- **Social Integration**: Friend recommendations and group event planning
+
+### Performance & Scale
+- **Caching Layer**: Redis/Memorystore for popular locations (1-2 hour TTL)
+- **Asynchronous Processing**: Job queue system for long-running queries
+- **Authentication & Rate Limiting**: API keys and abuse prevention
+
+### Expanded Capabilities
+- **New Agent Types**: WeatherAgent, LocalEventsAgent, TrafficAgent
+- **Enhanced Multimodal**: Video analysis, audio processing
+- **Hyperlocal Insights**: Neighborhood-specific recommendations
+- **Business Analytics**: Personality distribution insights for vendors
+
+## 🏆 Key Innovations
+
+1. **Personality-Based Filtering**: First city app to use MBTI for event curation
+2. **Self-Healing Data Pipeline**: Automatic error correction with specialist LLM agents
+3. **Multimodal Event Reporting**: Users contribute through images, text, and video
+4. **Concurrent Agent Architecture**: Parallel processing for real-time performance
+5. **JOMO Philosophy**: Joy of Missing Out on irrelevant information
