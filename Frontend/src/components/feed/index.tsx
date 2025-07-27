@@ -1,292 +1,326 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
-import { MapPin } from "lucide-react";
 import { useLocationStore } from "@/store/location-store";
+import {
+  getCityEvents,
+  getLocalityEvents,
+  getUserReports,
+} from "@/lib/realtimeData";
+import { MapPin } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+// import { Link } from "@tanstack/react-router";
 
+interface Movie {
+  name: string;
+  genre: string;
+  compatible_mbti: string[];
+  language: string;
+  certificate: string;
+  description: string;
+  locations_available: {
+    [key: string]: string[]; // Key is the location name, value is an array of showtimes
+  };
+}
+
+interface Restaurant {
+  name: string;
+  cuisine: string;
+  rating: number | null; // Rating can be a number or null
+  address: string;
+}
+
+interface Concert {
+  name: string;
+  date: string; // You may want to use Date type if you parse it
+  venue: string;
+  description: string;
+}
+
+interface LocalityEvents {
+  location: string; // e.g., "Whitefield"
+  movies: Movie[];
+  restaurants: {
+    veg_restaurants: Restaurant[];
+    nonveg_restaurants: Restaurant[];
+  };
+  concerts: Concert[];
+}
+
+// EventCard Component - only used for User Reports
+const EventCard = ({ event }: { event: any }) => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const randomColor = () => {
+    const colors = [
+      "bg-gradient-to-br from-pink-50 to-rose-100",
+      "bg-gradient-to-br from-emerald-50 to-teal-100",
+      "bg-gradient-to-br from-amber-50 to-orange-100",
+      "bg-gradient-to-br from-indigo-50 to-purple-100",
+    ];
+    return colors[Math.floor(Math.random() * colors.length)];
+  };
+
+  if (!event?.title && !event?.Eventname) return null;
+
+  const title = event.title || event.Eventname;
+  const description = event.description || event.EventSummary;
+  const location = event.location || event.Location;
+
+  return (
+    <div
+      className={`${randomColor()} border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer`}
+      onClick={() => setIsDialogOpen(true)}
+    >
+      <div className="flex items-start justify-between mb-2">
+        <div className="flex items-center space-x-2">
+          <div className="w-3 h-3 rounded-full bg-blue-500" />
+          <span className="text-sm font-medium text-gray-900">{title}</span>
+        </div>
+      </div>
+
+      <p className="text-sm text-gray-600 mb-2">
+        {description?.length > 250
+          ? description.substring(0, 250) + "..."
+          : description}
+      </p>
+
+      <div className="flex items-center space-x-2">
+        <MapPin className="w-4 h-4 text-gray-400" />
+        <span className="text-xs text-gray-500">{location}</span>
+      </div>
+
+      {isDialogOpen && (
+        <EventDialog
+          event={{ title, description, location }}
+          onClose={() => setIsDialogOpen(false)}
+        />
+      )}
+    </div>
+  );
+};
+
+// Helper function to transform data for EventCard
+const transformMovieForEventCard = (movie: Movie) => ({
+  title: movie.name,
+  description: `${movie.genre} • ${movie.language} • ${movie.certificate}\n${movie.description}`,
+  location: Object.keys(movie.locations_available || {}).join(', ') || 'Various locations',
+  type: 'movie'
+});
+
+const transformRestaurantForEventCard = (restaurant: Restaurant, type: 'veg' | 'nonveg') => ({
+  title: restaurant.name,
+  description: `${restaurant.cuisine} • ${type.toUpperCase()} Restaurant${restaurant.rating ? ` • Rating: ${restaurant.rating}★` : ''}`,
+  location: restaurant.address,
+  type: `${type}_restaurant`
+});
+
+const transformConcertForEventCard = (concert: Concert) => ({
+  title: concert.name,
+  description: concert.description,
+  location: `${concert.venue} • ${concert.date}`,
+  type: 'concert'
+});
+
+// Events Section Component - Using EventCard for all items (max 4)
+const EventsSection = ({ title, data, showMore = false }: { title: string; data: LocalityEvents; showMore?: boolean }) => {
+  const allEvents = [
+    ...(data.movies?.map(movie => transformMovieForEventCard(movie)) || []),
+    ...(data.concerts?.map(concert => transformConcertForEventCard(concert)) || []),
+    ...(data.restaurants?.veg_restaurants?.map(restaurant => transformRestaurantForEventCard(restaurant, 'veg')) || []),
+    ...(data.restaurants?.nonveg_restaurants?.map(restaurant => transformRestaurantForEventCard(restaurant, 'nonveg')) || [])
+  ];
+
+  const displayEvents = showMore ? allEvents : allEvents.slice(0, 4);
+  const hasMoreEvents = allEvents.length > 4;
+
+  if (allEvents.length === 0) {
+    return (
+      <div className="text-gray-400 text-center py-8">
+        No {title.toLowerCase()} available at the moment
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="grid grid-cols-2 gap-2">
+        {displayEvents.map((event, index) => (
+          <EventCard key={`${event.title}-${index}`} event={event} />
+        ))}
+      </div>
+      {!showMore && hasMoreEvents && (
+        <div className="flex justify-center mt-4">
+          <a href="/events">
+            <button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors">
+              Show More Events ({allEvents.length - 4} more)
+            </button>
+          </a>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// EventDialog Component using shadcn Dialog
+const EventDialog = ({
+  event,
+  onClose,
+}: {
+  event: any;
+  onClose: () => void;
+}) => {
+  return (
+    <Dialog open={true} onOpenChange={onClose}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{event.title}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <p className="text-sm">{event.description}</p>
+          <div className="flex items-center space-x-2">
+            <MapPin className="w-4 h-4" />
+            <span className="text-xs">{event.location}</span>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// MetroPulse Component
 export default function MetroPulse() {
-  const [activeTab] = useState("feed");
   const { fetchLocation, city, locality } = useLocationStore();
+  const [realtimeEvents, setRealtimeEvents] = useState<LocalityEvents>({
+    location: "",
+    movies: [],
+    restaurants: {
+      veg_restaurants: [],
+      nonveg_restaurants: [],
+    },
+    concerts: [],
+  });
+  const [cityEvents, setCityEvents] = useState<LocalityEvents>({
+    location: "",
+    movies: [],
+    restaurants: {
+      veg_restaurants: [],
+      nonveg_restaurants: [],
+    },
+    concerts: [],
+  });
+  const [userReps, setUserReps] = useState<any>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const getLocation = async () => {
+      setLoading(true);
       await fetchLocation();
+      setLoading(false);
     };
-    // const getCityEvents() = async () => {
-    //   await fetchCityEvents(locality);
-    // }
+
+    const userReports = async () => {
+      try {
+        const rep = await getUserReports();
+        setUserReps(rep);
+        console.log("User Reports:", rep);
+      } catch (error) {
+        console.error("Failed to fetch user reports:", error);
+      }
+    };
+
+    const getRealTimeEvents = async () => {
+      if (locality) {
+        const events = await getLocalityEvents(locality);
+        setRealtimeEvents(events);
+        console.log("Real-time Events:", events);
+      } else {
+        console.warn(
+          "Locality is not defined, skipping real-time events fetch."
+        );
+      }
+    };
+
+    const cityEventsFn = async () => {
+      if (city) {
+        const events = await getCityEvents(city);
+        setCityEvents(events);
+        console.log("City Events:", events);
+      } else {
+        console.warn(
+          "City is not defined, skipping city events fetch."
+        );
+      }
+    };
+
     getLocation();
-    // getCityEvents();
-  }, [fetchLocation]);
-  const events = [
-    {
-      id: 1,
-      title: "Flash Mob at Brigade Road",
-      description: "Large crowd gathering for surprise dance performance",
-      location: "Brigade Road, MG Road",
-      type: "event",
-      priority: "high",
-      time: "2 mins ago",
-      likes: 24,
-      comments: 8,
-      image: true,
-      tags: ["entertainment", "crowd"],
-      mbtiMatch: "ENFP",
-    },
-    {
-      id: 2,
-      title: "Power Outage in Koramangala",
-      description: "Multiple reports of power cuts affecting Blocks 3-5",
-      location: "Koramangala, Bangalore",
-      type: "alert",
-      priority: "urgent",
-      time: "5 mins ago",
-      likes: 12,
-      comments: 15,
-      image: false,
-      tags: ["infrastructure", "utility"],
-      mbtiMatch: "ISTJ",
-    },
-    {
-      id: 3,
-      title: "Book Club Meetup",
-      description: "Weekly discussion on 'The Alchemist' at cozy café",
-      location: "Indiranagar, Bangalore",
-      type: "event",
-      priority: "medium",
-      time: "15 mins ago",
-      likes: 8,
-      comments: 3,
-      image: true,
-      tags: ["books", "community"],
-      mbtiMatch: "INFP",
-    },
-  ];
+    userReports();
+    cityEventsFn();
+    getRealTimeEvents();
+  }, [fetchLocation, locality, city]);
 
-  const EventCard = ({ event }: { event: any }) => (
-    <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4 hover:shadow-lg transition-all duration-200  transform hover:-translate-y-1">
-      <div className="flex items-start justify-between mb-2">
-        <div className="flex items-center space-x-2">
-          <div
-            className={`w-3 h-3 rounded-full shadow-sm ${
-              event.priority === "urgent"
-                ? "bg-gradient-to-r from-red-500 to-red-600"
-                : event.priority === "high"
-                  ? "bg-gradient-to-r from-orange-500 to-amber-500"
-                  : "bg-gradient-to-r from-blue-500 to-blue-600"
-            }`}
-          ></div>
-          <span className="text-sm font-medium text-gray-900">
-            {event.title}
-          </span>
-        </div>
-        <span className="text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded-full">
-          {event.time}
-        </span>
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-800 flex items-center justify-center">
+        <div className="text-white">Loading...</div>
       </div>
-
-      <p className="text-sm text-gray-600 mb-2">{event.description}</p>
-
-      <div className="flex items-center space-x-2 mb-3">
-        <MapPin className="w-4 h-4 text-gray-400" />
-        <span className="text-xs text-gray-500">{event.location}</span>
-      </div>
-
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          {event.tags.map((tag: undefined) => (
-            <span
-              key={tag}
-              className="bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 text-xs px-2 py-1 rounded-full border border-blue-200"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
-  const MapView = () => (
-    <div className="h-full bg-gray-100 rounded-lg relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-green-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <MapPin className="w-8 h-8 text-white" />
-          </div>
-          <h3 className="text-lg font-semibold text-gray-800 mb-2">
-            Interactive City Map
-          </h3>
-          <p className="text-sm text-gray-600">
-            Real-time events and alerts visualization
-          </p>
-        </div>
-      </div>
-
-      {/* Map markers simulation */}
-      <div className="absolute top-20 left-20 w-4 h-4 bg-red-500 rounded-full animate-pulse"></div>
-      <div className="absolute top-32 right-24 w-4 h-4 bg-orange-500 rounded-full animate-pulse"></div>
-      <div className="absolute bottom-20 left-1/3 w-4 h-4 bg-blue-500 rounded-full animate-pulse"></div>
-      <div className="absolute bottom-32 right-1/3 w-4 h-4 bg-green-500 rounded-full animate-pulse"></div>
-    </div>
-  );
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-800 flex">
       <div className="flex-1 flex flex-col">
         <main className="flex-1 p-6 pb-24">
-          {activeTab === "feed" ? (
-            <div className="max-w-4xl mx-auto">
-              
+          <div className="max-w-4xl mx-auto space-y-8">
+            {/* City Events */}
+            <div>
+              <h2 className="text-lg font-semibold text-white mb-4">
+                City Events
+              </h2>
+              <EventsSection title="City Events" data={cityEvents} />
+            </div>
 
-              {/* Events in Your Area */}
-              <div className="mb-8">
-                <h2 className="text-lg font-semibold text-white mb-4">
-                  Events in {city}
-                </h2>
-                <div className="relative">
-                  <div className="grid grid-cols-2 gap-4">
-                    {/* Event Card 1 */}
-                    <div className="min-w-[280px] bg-gradient-to-br from-pink-50 to-rose-100 border border-pink-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="bg-gradient-to-r from-pink-500 to-rose-500 text-white text-xs px-3 py-1 rounded-full font-medium">
-                          Tonight
-                        </span>
-                        <div className="w-2 h-2 bg-pink-500 rounded-full"></div>
-                      </div>
-                      <h3 className="font-semibold text-gray-900 mb-1">
-                        Jazz Night at Toit
-                      </h3>
-                      <p className="text-sm text-gray-600 mb-2">
-                        Live music and craft beer
-                      </p>
-                      <div className="flex items-center text-xs text-gray-500">
-                        <MapPin className="w-3 h-3 mr-1" />
-                        <span>0.5 km away</span>
-                      </div>
-                    </div>
-
-                    {/* Event Card 2 */}
-                    <div className="min-w-[280px] bg-gradient-to-br from-emerald-50 to-teal-100 border border-emerald-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs px-3 py-1 rounded-full font-medium">
-                          Tomorrow
-                        </span>
-                        <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                      </div>
-                      <h3 className="font-semibold text-gray-900 mb-1">
-                        Yoga in the Park
-                      </h3>
-                      <p className="text-sm text-gray-600 mb-2">
-                        Morning session at Lalbagh
-                      </p>
-                      <div className="flex items-center text-xs text-gray-500">
-                        <MapPin className="w-3 h-3 mr-1" />
-                        <span>1.2 km away</span>
-                      </div>
-                    </div>
-
-                    {/* Event Card 3 */}
-                    <div className="min-w-[280px] bg-gradient-to-br from-amber-50 to-orange-100 border border-amber-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs px-3 py-1 rounded-full font-medium">
-                          This Weekend
-                        </span>
-                        <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                      </div>
-                      <h3 className="font-semibold text-gray-900 mb-1">
-                        Food Truck Festival
-                      </h3>
-                      <p className="text-sm text-gray-600 mb-2">
-                        Local cuisines and street food
-                      </p>
-                      <div className="flex items-center text-xs text-gray-500">
-                        <MapPin className="w-3 h-3 mr-1" />
-                        <span>0.8 km away</span>
-                      </div>
-                    </div>
-
-                    {/* Event Card 4 */}
-                    <div className="min-w-[280px] bg-gradient-to-br from-indigo-50 to-purple-100 border border-indigo-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-xs px-3 py-1 rounded-full font-medium">
-                          Next Week
-                        </span>
-                        <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
-                      </div>
-                      <h3 className="font-semibold text-gray-900 mb-1">
-                        Tech Meetup
-                      </h3>
-                      <p className="text-sm text-gray-600 mb-2">
-                        AI & Machine Learning talk
-                      </p>
-                      <div className="flex items-center text-xs text-gray-500">
-                        <MapPin className="w-3 h-3 mr-1" />
-                        <span>0.3 km away</span>
-                      </div>
-                    </div>
+            {/* User Reports */}
+            <div>
+              <h2 className="text-lg font-semibold text-white mb-4">
+                User Reports
+              </h2>
+              {userReps.length > 0 ? (
+                <div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {userReps.slice(0, 4).map((event: any) => (
+                      <EventCard key={event.id} event={event} />
+                    ))}
                   </div>
-
-                  {/* More Events Button */}
-                  {events.length > 4 && (
-                    <div className="mt-4">
-                      <a
-                        href="/events"
-                        className="inline-block bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
-                      >
-                        More Events
+                  {userReps.length > 4 && (
+                    <div className="flex justify-center mt-4">
+                      <a href="/reports">
+                        <button className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg transition-colors">
+                          Show More Reports ({userReps.length - 4} more)
+                        </button>
                       </a>
                     </div>
                   )}
                 </div>
-              </div>
-
-              {/* Real-time Updates */}
-              <div className="mb-6">
-                <h2 className="text-lg font-semibold text-white mb-4">
-                  Real-time Updates
-                </h2>
-              </div>
-
-              {/* Events List */}
-              <div className=" grid grid-cols-2 gap-2">
-                {events.map((event) => (
-                  <EventCard key={event.id} event={event} />
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className="h-full pb-24">
-              <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-bold text-white">City Heatmap</h1>
-                <div className="flex items-center space-x-4">
-                  <select className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option>All Events</option>
-                    <option>Alerts Only</option>
-                    <option>Entertainment</option>
-                    <option>Infrastructure</option>
-                  </select>
+              ) : (
+                <div className="text-gray-400 text-center py-8">
+                  No user reports available
                 </div>
-              </div>
+              )}
+            </div>
 
-              <div className="h-[600px]">
-                <MapView />
-              </div>
+            {/* Locality Events */}
+            <div>
+              <h2 className="text-lg font-semibold text-white mb-4">
+                Locality Events
+              </h2>
+              <EventsSection title="Locality Events" data={realtimeEvents} />
             </div>
-          )}
-          {/* Floating Chat Search Bar */}
-          {/* <div className="fixed bottom-6 left-[57%] transform -translate-x-1/2 w-full max-w-3xl px-6 z-40">
-            <div className="bg-gray-800 border border-gray-600 rounded-full shadow-2xl px-6 py-4 flex items-center space-x-4">
-              <Search className="w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Ask MetroPulse anything... 'What's happening near me?'"
-                className="flex-1 bg-transparent border-none outline-none text-gray-200 placeholder-gray-400"
-              />
-              <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-2 rounded-full hover:from-blue-700 hover:to-purple-700 transition-all">
-                <Send className="w-4 h-4" />
-              </button>
-            </div>
-          </div> */}
+          </div>
         </main>
       </div>
     </div>

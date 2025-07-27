@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TrendingRouteImport } from './routes/trending'
+import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as MapRouteImport } from './routes/map'
 import { Route as FeedRouteImport } from './routes/feed'
@@ -21,6 +22,11 @@ import { Route as IndexRouteImport } from './routes/index'
 const TrendingRoute = TrendingRouteImport.update({
   id: '/trending',
   path: '/trending',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -67,6 +73,7 @@ export interface FileRoutesByFullPath {
   '/feed': typeof FeedRoute
   '/map': typeof MapRoute
   '/profile': typeof ProfileRoute
+  '/reports': typeof ReportsRoute
   '/trending': typeof TrendingRoute
 }
 export interface FileRoutesByTo {
@@ -77,6 +84,7 @@ export interface FileRoutesByTo {
   '/feed': typeof FeedRoute
   '/map': typeof MapRoute
   '/profile': typeof ProfileRoute
+  '/reports': typeof ReportsRoute
   '/trending': typeof TrendingRoute
 }
 export interface FileRoutesById {
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   '/feed': typeof FeedRoute
   '/map': typeof MapRoute
   '/profile': typeof ProfileRoute
+  '/reports': typeof ReportsRoute
   '/trending': typeof TrendingRoute
 }
 export interface FileRouteTypes {
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
     | '/feed'
     | '/map'
     | '/profile'
+    | '/reports'
     | '/trending'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -110,6 +120,7 @@ export interface FileRouteTypes {
     | '/feed'
     | '/map'
     | '/profile'
+    | '/reports'
     | '/trending'
   id:
     | '__root__'
@@ -120,6 +131,7 @@ export interface FileRouteTypes {
     | '/feed'
     | '/map'
     | '/profile'
+    | '/reports'
     | '/trending'
   fileRoutesById: FileRoutesById
 }
@@ -131,6 +143,7 @@ export interface RootRouteChildren {
   FeedRoute: typeof FeedRoute
   MapRoute: typeof MapRoute
   ProfileRoute: typeof ProfileRoute
+  ReportsRoute: typeof ReportsRoute
   TrendingRoute: typeof TrendingRoute
 }
 
@@ -141,6 +154,13 @@ declare module '@tanstack/react-router' {
       path: '/trending'
       fullPath: '/trending'
       preLoaderRoute: typeof TrendingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -203,6 +223,7 @@ const rootRouteChildren: RootRouteChildren = {
   FeedRoute: FeedRoute,
   MapRoute: MapRoute,
   ProfileRoute: ProfileRoute,
+  ReportsRoute: ReportsRoute,
   TrendingRoute: TrendingRoute,
 }
 export const routeTree = rootRouteImport

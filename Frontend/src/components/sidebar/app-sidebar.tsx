@@ -1,9 +1,7 @@
 import {
   Zap,
   // MapPin,
-  AlertTriangle,
   Calendar,
-  Eye,
   User, // This is the Lucide-React User icon
   GalleryVerticalEnd,
   BotIcon,
@@ -42,25 +40,25 @@ export const items = [
   //   icon: MapPin,
   // },
   {
-    title: "Chat",
-    url: "/chat",
+    title: "Reports",
+    url: "/reports",
     icon: BotIcon,
   },
-  {
-    title: "Alerts",
-    url: "/alerts",
-    icon: AlertTriangle,
-  },
+  // {
+  //   title: "Alerts",
+  //   url: "/alerts",
+  //   icon: AlertTriangle,
+  // },
   {
     title: "Events",
     url: "/events",
     icon: Calendar,
   },
-  {
-    title: "Trending",
-    url: "/trending",
-    icon: Eye,
-  },
+  // {
+  //   title: "Trending",
+  //   url: "/trending",
+  //   icon: Eye,
+  // },
   {
     title: "Profile",
     url: "/profile",
